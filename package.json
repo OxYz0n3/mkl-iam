@@ -1,0 +1,7 @@
+{
+  "name": "mkl-iam",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
