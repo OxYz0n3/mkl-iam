@@ -1,6 +1,9 @@
 {
   "name": "mkl-iam",
   "private": true,
+  "scripts": {
+    "dev": "bun --parallel --filter '*' dev"
+  },
   "workspaces": [
     "packages/*"
   ]
