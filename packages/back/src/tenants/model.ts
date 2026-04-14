@@ -22,5 +22,6 @@ export const tGetTenantsResponse = t.Array(t.Object({
     tenant: tTenant,
     role: tUserToTenant.properties.role,
     joinedAt: tUserToTenant.properties.joinedAt,
+    employeeCount: t.Number()
 }));
 export type GetTenantsResponse = Static<typeof tGetTenantsResponse>;

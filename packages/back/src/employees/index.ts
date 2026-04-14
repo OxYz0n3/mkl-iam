@@ -9,11 +9,14 @@ export const employees = new Elysia({ prefix: "/employees", tags: [ "Employees" 
     .use(protectedMiddleware)
     .get("/:id", ({ params: { id } }) => EmployeeService.getEmployeeById(id), {
         params: t.Object({
-            id: t.Number(),
+            id: t.String(),
         }),
         response: TEmployee,
     })
-    .get("/", ({ user }) => { console.log(user) ;return EmployeeService.getEmployees() }, {
+    .get("/", ({ user, query: { tenantId } }) => EmployeeService.getEmployees(user.id, tenantId), {
+        query: t.Object({
+            tenantId: t.String(),
+        }),
         response: t.Array(TEmployee),
     })
     .post("/", ({ body }) => EmployeeService.createEmployee(body), {

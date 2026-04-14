@@ -36,6 +36,7 @@ export const usersToTenants = pgTable('users_to_tenants', {
 
 export const employees = pgTable("employees", {
     id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }).notNull(),
     firstName: varchar('first_name', { length: 100 }).notNull(),
     lastName: varchar('last_name', { length: 100 }).notNull(),
     email: varchar('email', { length: 255 }).notNull().unique(),

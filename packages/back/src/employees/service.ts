@@ -1,8 +1,11 @@
-import { DrizzleQueryError, eq } from "drizzle-orm";
-import { db } from "../db/db";
-import { table } from "../db/schema";
-import { CreateEmployee, Employee } from "./model";
+import { DrizzleQueryError, eq, and, getTableColumns } from "drizzle-orm";
+
 import { HTTPError, NotFoundError, UniqueError } from "../utils/error";
+import { CreateEmployee, Employee } from "./model";
+import { table } from "../db/schema";
+import { db } from "../db/db";
+import { employees } from ".";
+
 
 export class EmployeeService {
     static async createEmployee(newEmployee: CreateEmployee): Promise<Employee> {
@@ -21,9 +24,19 @@ export class EmployeeService {
         }
     };
 
-    static async getEmployees(): Promise<Employee[]> {
+    static async getEmployees(userId: string, tenantId: string): Promise<Employee[]> {
         try {
-            const employees = await db.select().from(table.employees);
+            const employees = await db
+                .select(getTableColumns(table.employees))
+                .from(table.employees)
+                .innerJoin(
+                    table.usersToTenants,
+                    eq(table.employees.tenantId, table.usersToTenants.tenantId),
+                )
+                .where(and(
+                    eq(table.employees.tenantId, tenantId),
+                    eq(table.usersToTenants.userId, userId),
+                ));
 
             return (employees);
         } catch (error) {
@@ -32,7 +45,7 @@ export class EmployeeService {
         }
     };
 
-    static async getEmployeeById(id: number): Promise<Employee> {
+    static async getEmployeeById(id: string): Promise<Employee> {
         try {
             const [ employee ] = await db.select().from(table.employees).where(eq(table.employees.id, id));
 

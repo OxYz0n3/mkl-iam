@@ -37,7 +37,7 @@ export default function LoginPage()
       } else {
         setToken(loginResponse.data.accessToken);
         setUser(loginResponse.data.user);
-        navigate('/');
+        navigate('/', { replace: true });
       }
     } catch (error) {
       toast.error('Une erreur est survenue lors de la connexion.');
