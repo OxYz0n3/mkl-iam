@@ -7,8 +7,9 @@ if (!process.env['ACCESS_JWT_SECRET'])
     throw new Error("ACCESS_JWT_SECRET is not defined");
 
 type UserPayload = {
-    id: number;
+    id: string;
 }
+
 
 export const protectedMiddleware = (app: Elysia) => 
     app.use(jwt({
@@ -25,11 +26,11 @@ export const protectedMiddleware = (app: Elysia) =>
         const token = auth.slice(7);
         const payload = await accessJwt.verify(token);
 
-        if (!payload) {
+        if (!payload || !payload['userId']) {
             throw new UnauthorizedError("Invalid token");
         }
 
-        return {
-            user: { id: Number(payload.id) } as UserPayload
-        };
+        return ({
+            user: { id: payload.userId } as UserPayload
+        });
     });

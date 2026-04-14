@@ -2,9 +2,9 @@ import { openapi } from '@elysiajs/openapi'
 import { cors } from '@elysiajs/cors'
 import { Elysia } from "elysia";
 
-import { employees } from "./employees/index";
+import { employees } from "./employees";
+import { tenants } from "./tenants"
 import { auth } from "./auth";
-
 
 const app = new Elysia()
   .use(cors())
@@ -12,6 +12,7 @@ const app = new Elysia()
     path: '/docs',
   }))
   .use(auth)
+  .use(tenants)
   .use(employees)
   .listen(3000);
 

@@ -1,61 +1,69 @@
-// RegisterPage.tsx
+import { NavLink, useNavigate } from 'react-router';
+import validator from 'validator';
 import { useState } from 'react';
-import { NavLink } from 'react-router';
-import { Button } from '~/components/ui/button';
+import { toast } from 'sonner';
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
+import { Spinner } from '~/components/ui/spinner';
+import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 
+
+import { app } from '~/lib/api';
+
+
 export default function RegisterPage() {
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
 
-  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
-    setError('');
-    setSuccess('');
 
-    if (password !== passwordConfirmation) {
-      setError('Les mots de passe ne correspondent pas.');
-      return;
+    try {
+      const registerResponse = await app.auth.register.post({ firstName, lastName, email, password }, { fetch: { credentials: 'include' } });
+
+      if (registerResponse.error) {
+        toast.error("Une erreur est survenue lors de l'inscription.");
+      } else {
+        toast.success("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+        navigate('/auth/login');
+      }
+    } catch (error) {
+      toast.error("Une erreur est survenue lors de l'inscription.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setSuccess('Inscription réussie ! Bienvenue ' + firstname + '.');
-    
-    console.log('Soumission du formulaire :', { 
-      firstname, lastname, email, password 
-    });
   };
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center p-4">
+    <div className="flex h-screen w-screen items-center justify-center">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-2">
           <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
           <CardDescription>
             Remplissez les informations ci-dessous pour vous inscrire.
           </CardDescription>
         </CardHeader>
-        
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstname">Prénom</Label>
                 <Input
                   id="firstname"
                   placeholder="Jean"
-                  value={firstname}
-                  onChange={(e) => setFirstname(e.target.value)}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   required
+                  autoFocus
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -63,13 +71,13 @@ export default function RegisterPage() {
                 <Input
                   id="lastname"
                   placeholder="Dupont"
-                  value={lastname}
-                  onChange={(e) => setLastname(e.target.value)}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   required
+                  disabled={isLoading}
                />
               </div>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Adresse e-mail</Label>
               <Input
@@ -79,9 +87,11 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                aria-invalid={ email && !validator.isEmail(email) ? "true" : "false" }
+                autoComplete="email"
+                disabled={isLoading}
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
               <Input
@@ -90,9 +100,10 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
+                disabled={isLoading}
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password_confirmation">Confirmer le mot de passe</Label>
               <Input
@@ -101,22 +112,24 @@ export default function RegisterPage() {
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 required
+                aria-invalid={ password && passwordConfirmation && password !== passwordConfirmation ? "true" : "false" }
+                autoComplete="new-password"
+                disabled={isLoading}
               />
             </div>
-
-            {error && (
-              <div className="text-sm font-medium text-destructive">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="text-sm font-medium text-green-600 dark:text-green-500">
-                {success}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full">
-              S'inscrire
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !email || !validator.isEmail(email) || !firstName || !lastName || !password || password !== passwordConfirmation}
+            >
+              { isLoading ?
+                <>
+                  <Spinner />
+                  Inscription en cours...
+                </>
+              :
+                "S'inscrire"
+              }
             </Button>
           </form>
         </CardContent>

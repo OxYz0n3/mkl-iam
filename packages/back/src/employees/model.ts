@@ -9,7 +9,7 @@ const _createEmployee = createInsertSchema(table.employees, {
 });
 const _selectEmployee = createSelectSchema(table.employees);
 
-export const TCreateEmployee = t.Omit(_createEmployee, [ 'createdAt', 'updatedAt' ]);
+export const TCreateEmployee = t.Omit(_createEmployee, [ 'id', 'createdAt', 'updatedAt' ]);
 export type CreateEmployee = Static<typeof TCreateEmployee>;
 
 export const TEmployee = _selectEmployee;

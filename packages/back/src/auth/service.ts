@@ -1,15 +1,45 @@
 import { DrizzleQueryError } from "drizzle-orm/errors";
-import { jwt } from "@elysiajs/jwt";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 
 import { BadRequestError, HTTPError, UniqueError } from "../utils/error";
-import { CreateUser, LoginBody, User } from "./model";
+import { CreateUser, LoginBody, Session, User } from "./model";
 import { table } from "../db/schema";
 import { db } from "../db/db";
 
 
 export class AuthService {
-    static async login(body: LoginBody, accessJwt: any, refreshJwt: any): Promise<{ accessToken: string, refreshToken: string }> {
+    static async findUserById(id: string): Promise<User>
+    {
+        const [ user ] = await db.select().from(table.users).where(eq(table.users.id, id));
+
+        if (!user)
+            throw new BadRequestError("User not found");
+
+        return (user);
+    }
+
+    static async refreshSession(sessionId: string): Promise<Session>
+    {
+        try {
+            const [ session ] = await db.update(table.sessions)
+                .set({ 'expiresAt': new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) })
+                .where(and(eq(table.sessions.id, sessionId), gt(table.sessions.expiresAt, new Date())))
+                .returning();
+
+            if (!session)
+                throw new BadRequestError("Invalid session");
+
+            return (session);
+        } catch (error) {
+            if (error instanceof BadRequestError)
+                throw error;
+
+            console.error(error);
+            throw new HTTPError("Failed to get session");
+        }
+    }
+
+    static async login(body: LoginBody, accessJwt: any, refreshJwt: any): Promise<{ user: User, accessToken: string, refreshToken: string }> {
         try {
             const [ user ] = await db.select().from(table.users).where(eq(table.users.email, body.email));
     
@@ -21,10 +51,16 @@ export class AuthService {
             if (!isValid)
                 throw new BadRequestError("Invalid email or password");
 
-            const refreshToken = await refreshJwt.sign({ id: user.id });
-            const accessToken  = await accessJwt.sign({ id: user.id });
+            const [ session ] = await db.insert(table.sessions).values({
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+                userId: user.id,
+                userAgent: "Unknown", // You can enhance this by passing the user agent from the request
+            }).returning();
 
-            return { refreshToken, accessToken };
+            const refreshToken = await refreshJwt.sign({ sessionId: session.id });
+            const accessToken  = await accessJwt.sign({ userId: user.id });
+
+            return ({ user, refreshToken, accessToken });
         } catch (error) {
             if (error instanceof BadRequestError)
                 throw error;
