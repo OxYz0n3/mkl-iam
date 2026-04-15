@@ -2,6 +2,7 @@ import { type RouteConfig, index, route, prefix, layout } from "@react-router/de
 
 export default [
     layout("routes/_protected.tsx", [
+        route("account", "routes/account.tsx"),
         route("add-tenant", "routes/add-tenant.tsx"),
         layout("routes/main.tsx", [
             index("routes/dashboard.tsx"),

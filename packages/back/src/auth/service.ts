@@ -83,9 +83,44 @@ export class AuthService {
                     throw new UniqueError("email");
                 }
             }
-            console.error(error);
 
+            if (error instanceof BadRequestError || error instanceof UniqueError)
+                throw error;
+
+            console.error(error);
             throw new HTTPError("Failed to register user");
+        }
+    }
+
+    static async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<User> {
+        try {
+            const [ user ] = await db.select().from(table.users).where(eq(table.users.id, userId));
+
+            if (!user)
+                throw new BadRequestError("User not found");
+
+            const isValid = await Bun.password.verify(currentPassword, user.password);
+
+            if (!isValid)
+                throw new BadRequestError("Current password is incorrect");
+
+            const hash = await Bun.password.hash(newPassword);
+
+            const [ updatedUser ] = await db.update(table.users)
+                .set({ 
+                    password: hash,
+                    updatedAt: new Date()
+                })
+                .where(eq(table.users.id, userId))
+                .returning();
+
+            return (updatedUser);
+        } catch (error) {
+            if (error instanceof BadRequestError)
+                throw error;
+
+            console.error(error);
+            throw new HTTPError("Failed to change password");
         }
     }
 };

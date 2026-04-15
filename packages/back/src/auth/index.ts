@@ -1,9 +1,10 @@
 import { Elysia, t } from "elysia";
 import { jwt} from "@elysiajs/jwt";
 
-import { TAuthCookie, TCreateUser, TLoginBody, TUser } from "./model";
+import { authModels, TAuthCookie, TChangePassword, TCreateUser, TLoginBody } from "./model";
 import { ForbiddenError } from "../utils/error";
 import { AuthService } from "./service";
+import { protectedMiddleware } from "../middleware";
 
 
 if (!process.env['ACCESS_JWT_SECRET'] || !process.env['REFRESH_JWT_SECRET'])
@@ -21,6 +22,7 @@ export const auth = new Elysia({ prefix: "/auth", tags: [ "Auth" ] })
         secret: process.env['REFRESH_JWT_SECRET'],
         exp: '7d',
     }))
+    .use(authModels)
     .post("/login", async ({ body, cookie, accessJwt, refreshJwt }) => {
         const { user, accessToken, refreshToken } = await AuthService.login(body, accessJwt, refreshJwt);
 
@@ -35,12 +37,11 @@ export const auth = new Elysia({ prefix: "/auth", tags: [ "Auth" ] })
 
         return ({ user, accessToken });
     }, {
-        cookie: t.Optional(TAuthCookie),
         body: TLoginBody,
         response: {
             200: t.Object({
                 accessToken: t.String(),
-                user: TUser,
+                user: t.Ref('User'),
             }),
             400: t.Object({
                 error: t.Literal("Invalid email or password"),
@@ -82,7 +83,7 @@ export const auth = new Elysia({ prefix: "/auth", tags: [ "Auth" ] })
         response: {
             200: t.Object({
                 accessToken: t.String(),
-                user: TUser,
+                user: t.Ref('User'),
             }),
         }
     })
@@ -95,4 +96,16 @@ export const auth = new Elysia({ prefix: "/auth", tags: [ "Auth" ] })
         response: t.Object({
             message: t.Literal("Logged out successfully"),
         }),
+    })
+    .use(protectedMiddleware)
+    .post("/change-password", async ({ body, user }) => {
+        await AuthService.changePassword(user.id, body.currentPassword, body.newPassword);
+        return { message: "Password changed successfully" };
+    }, {
+        body: TChangePassword,
+        response: {
+            200: t.Object({
+                message: t.Literal("Password changed successfully"),
+            }),
+        }
     });

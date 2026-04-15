@@ -92,7 +92,7 @@ export function NavUser({ user }: { user: User })
             </DropdownMenuGroup>
             <DropdownMenuSeparator /> */}
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={ () => navigate('/account') }>
                 <BadgeCheck />
                 Compte
               </DropdownMenuItem>

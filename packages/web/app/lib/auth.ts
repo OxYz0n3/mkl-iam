@@ -9,7 +9,7 @@ let user: User | null = null;
 export const getToken = () => accessToken;
 export const setToken = (token: string | null) => accessToken = token;
 export const getUser: () => User | null = () => user;
-export const setUser = (user: User | null) => user = user;
+export const setUser = (newUser: User | null) => user = newUser;
 
 export async function logout()
 {

@@ -16,6 +16,7 @@ export const protectedMiddleware = (app: Elysia) =>
         name: 'accessJwt',
         secret: process.env['ACCESS_JWT_SECRET']!
     }))
+    .guard({ detail: { security: [ { bearerAuth: [] } ] }})
     .derive(async ({ headers, accessJwt }) => {
         const auth = headers.authorization;
 
