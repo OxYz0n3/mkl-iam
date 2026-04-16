@@ -1,21 +1,21 @@
 import { DrizzleQueryError, eq, and, getTableColumns } from "drizzle-orm";
 
 import { HTTPError, NotFoundError, UniqueError } from "../utils/error";
-import { CreateEmployee, Employee } from "./model";
+import { AddEmployee, Employee } from "./model";
 import { table } from "../db/schema";
 import { db } from "../db/db";
-import { employees } from ".";
 
 
 export class EmployeeService {
-    static async createEmployee(newEmployee: CreateEmployee): Promise<Employee> {
+    static async addEmployee(newEmployee: AddEmployee): Promise<Employee>
+    {
         try {
             const [ employee ] = await db.insert(table.employees).values(newEmployee).returning();
 
             return (employee);
         } catch (error) {
             if (error instanceof DrizzleQueryError) {
-                if (error.cause?.message.includes("employee_email_unique")) {
+                if (error.cause?.message.includes("employees_email_tenant_id_unique")) {
                     throw new UniqueError("email");
                 }
             }
@@ -24,7 +24,21 @@ export class EmployeeService {
         }
     };
 
-    static async getEmployees(userId: string, tenantId: string): Promise<Employee[]> {
+    static async deleteEmployee(id: string): Promise<void>
+    {
+        try {
+            const result = await db.delete(table.employees).where(eq(table.employees.id, id)).returning();
+
+            if (result.length === 0)
+                throw new NotFoundError("Employee");
+        } catch (error) {
+            console.error(error);
+            throw new HTTPError("Failed to delete employee");
+        }
+    }
+
+    static async getEmployees(userId: string, tenantId: string): Promise<Employee[]>
+    {
         try {
             const employees = await db
                 .select(getTableColumns(table.employees))

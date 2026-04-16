@@ -3,7 +3,7 @@ export class HTTPError extends Error {
 
     toResponse() {
 		return Response.json({
-			error: this.message,
+			message: this.message,
 		}, {
 			status: this.status
 		})

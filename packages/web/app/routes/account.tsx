@@ -1,25 +1,26 @@
-import { useState } from 'react';
-import { useOutletContext } from 'react-router';
-import { toast } from 'sonner';
+import { NavLink, useOutletContext } from 'react-router';
 import validator from 'validator';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { Spinner } from '~/components/ui/spinner';
-import { Separator } from '~/components/ui/separator';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { Separator } from '@/components/ui/separator';
 
-import { app } from '~/lib/api';
-import { getToken, setUser } from '~/lib/auth';
+import { app } from '@/lib/api';
+import { getToken } from '@/lib/auth';
 
 import type { User } from '@mkl-iam/back/src/auth/model';
+import { useUpdateProfile } from '@/hooks/use-account';
 
 
 export default function AccountPage() {
   const { user } = useOutletContext<{ user: User }>();
+  const { trigger: updateProfile, isMutating: isUpdatingProfile } = useUpdateProfile();
 
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
 
   // Profile form states
@@ -32,42 +33,12 @@ export default function AccountPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoadingProfile(true);
 
-    try {
-      const token = getToken();
-      const response = await app.account.profile.put(
-        { firstName, lastName, email },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          fetch: { credentials: 'include' },
-        }
-      );
-
-      if (response.error) {
-        if (response.error?.status === 409) {
-          toast.error("Cet email est déjà utilisé.");
-        } else {
-          toast.error("Erreur lors de la mise à jour du profil.");
-        }
-      } else {
-        // Update local state with new values
-        setFirstName(response.data.firstName);
-        setLastName(response.data.lastName);
-        setEmail(response.data.email);
-        // Update global user context
-        setUser(response.data);
-        toast.success("Profil mis à jour avec succès.");
-      }
-    } catch (error) {
-      toast.error("Erreur lors de la mise à jour du profil.");
-    } finally {
-      setIsLoadingProfile(false);
-    }
+    await updateProfile({ firstName, lastName, email });
+      // setUser(response.data);
+      toast.success("Profil mis à jour avec succès.");
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -114,166 +85,145 @@ export default function AccountPage() {
     newPassword === confirmPassword;
 
   return (
-    <div className="min-h-screen bg-muted/50 p-4 sm:p-8">
-      <div className="mx-auto max-w-2xl space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Paramètres du compte</h1>
-          <p className="text-muted-foreground mt-2">
-            Gérez vos informations personnelles et vos paramètres de sécurité.
-          </p>
-        </div>
-
-        {/* Profile Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations personnelles</CardTitle>
-            <CardDescription>
-              Mettez à jour vos informations de profil.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Prénom</Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    placeholder="Jean"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    disabled={isLoadingProfile}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Nom</Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Dupont"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    disabled={isLoadingProfile}
-                    required
-                  />
-                </div>
-              </div>
+    <div className="flex h-screen w-screen items-center justify-center p-4">
+      <Card className="w-full max-w-xl">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl font-bold">Parametres du compte</CardTitle>
+          <CardDescription>
+            Mettez a jour vos informations personnelles et votre mot de passe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <form onSubmit={handleProfileSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="email">Adresse email</Label>
+                <Label htmlFor="firstName">Prenom</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="jean.dupont@exemple.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoadingProfile}
-                  aria-invalid={email && !validator.isEmail(email) ? "true" : "false"}
+                  id="firstName"
+                  type="text"
+                  placeholder="Jean"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  disabled={isUpdatingProfile}
                   required
                 />
               </div>
-              <Button
-                type="submit"
-                disabled={isLoadingProfile || !isProfileFormValid}
-                className="w-full"
-              >
-                {isLoadingProfile ? (
-                  <>
-                    <Spinner />
-                    Mise à jour en cours...
-                  </>
-                ) : (
-                  "Mettre à jour le profil"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Separator />
-
-        {/* Password Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Changer le mot de passe</CardTitle>
-            <CardDescription>
-              Mettez à jour votre mot de passe pour maintenir la sécurité de votre compte.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="lastName">Nom</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Dupont"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  disabled={isUpdatingProfile}
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Adresse e-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="jean.dupont@exemple.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isUpdatingProfile}
+                aria-invalid={email && !validator.isEmail(email) ? 'true' : 'false'}
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={isUpdatingProfile || !isProfileFormValid}
+              className="w-full"
+            >
+              {isUpdatingProfile ? (
+                <>
+                  <Spinner />
+                  Mise a jour en cours...
+                </>
+              ) : (
+                'Mettre a jour le profil'
+              )}
+            </Button>
+          </form>
+
+          <Separator />
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label htmlFor="currentPassword">Mot de passe actuel</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  disabled={isLoadingPassword}
-                  required
-                  autoComplete="current-password"
-                />
+                <NavLink to="/auth/forgot-password" className="text-sm text-muted-foreground hover:underline" tabIndex={3}>
+                    Mot de passe oublié ?
+                </NavLink>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">Nouveau mot de passe</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  disabled={isLoadingPassword}
-                  required
-                  autoComplete="new-password"
-                  minLength={8}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 8 caractères
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={isLoadingPassword}
-                  required
-                  autoComplete="new-password"
-                  aria-invalid={
-                    confirmPassword && newPassword && newPassword !== confirmPassword
-                      ? "true"
-                      : "false"
-                  }
-                />
-                {confirmPassword && newPassword && newPassword !== confirmPassword && (
-                  <p className="text-xs text-destructive">
-                    Les mots de passe ne correspondent pas
-                  </p>
-                )}
-              </div>
-              <Button
-                type="submit"
-                disabled={isLoadingPassword || !isPasswordFormValid}
-                className="w-full"
-              >
-                {isLoadingPassword ? (
-                  <>
-                    <Spinner />
-                    Changement en cours...
-                  </>
-                ) : (
-                  "Changer le mot de passe"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+              <Input
+                id="currentPassword"
+                type="password"
+                placeholder="********"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                disabled={isLoadingPassword}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                placeholder="********"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isLoadingPassword}
+                required
+                autoComplete="new-password"
+                minLength={8}
+              />
+              <p className="text-xs text-muted-foreground">Minimum 8 caracteres</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="********"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isLoadingPassword}
+                required
+                autoComplete="new-password"
+                aria-invalid={
+                  confirmPassword && newPassword && newPassword !== confirmPassword
+                    ? 'true'
+                    : 'false'
+                }
+              />
+              {confirmPassword && newPassword && newPassword !== confirmPassword && (
+                <p className="text-xs text-destructive">Les mots de passe ne correspondent pas</p>
+              )}
+            </div>
+            <Button
+              type="submit"
+              disabled={isLoadingPassword || !isPasswordFormValid}
+              className="w-full"
+            >
+              {isLoadingPassword ? (
+                <>
+                  <Spinner />
+                  Changement en cours...
+                </>
+              ) : (
+                'Changer le mot de passe'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -7,9 +7,11 @@ import {
   isRouteErrorResponse,
 } from "react-router"
 
-import { Toaster } from "~/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import type { Route } from "./+types/root"
 import "./app.css"
+import { SWRConfig } from "swr";
+import { toast } from "sonner";
 
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -22,7 +24,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <SWRConfig value={{
+          onError: (error) => {
+            console.error(JSON.stringify(error, null, 4))
+            toast.error(error instanceof Error ? error.message : "An unexpected error occurred while fetching data.");
+          },
+        }}>
+          {children}
+        </SWRConfig>
         <ScrollRestoration />
         <Scripts />
         <Toaster />

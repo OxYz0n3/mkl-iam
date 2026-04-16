@@ -2,8 +2,8 @@ import { ChevronsUpDown, Plus, Settings, Users } from "lucide-react"
 import { useNavigate } from "react-router"
 
 import type { GetTenantsResponse, Tenant } from "@mkl-iam/back/src/tenants/model"
-import { Avatar, AvatarFallback } from "~/components/ui/avatar"
-import { Skeleton } from "~/components/ui/skeleton"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +12,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "~/components/ui/sidebar"
+} from "@/components/ui/sidebar"
 
 
 export function TenantsSwitcher({

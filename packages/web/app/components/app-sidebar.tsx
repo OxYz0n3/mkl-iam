@@ -4,8 +4,8 @@ import { useNavigate } from "react-router";
 import type { GetTenantsResponse, Tenant } from "@mkl-iam/back/src/tenants/model";
 import type { User } from "@mkl-iam/back/src/auth/model"
 
-import { TenantsSwitcher } from "~/components/tenants-switcher"
-import { NavUser } from "~/components/nav-user"
+import { TenantsSwitcher } from "@/components/tenants-switcher"
+import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "~/components/ui/sidebar"
+} from "@/components/ui/sidebar"
  
 
 export function AppSidebar({ user, tenants, menuItems, activeTenant, setActiveTenant }: {

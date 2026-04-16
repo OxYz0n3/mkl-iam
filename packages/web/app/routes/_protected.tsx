@@ -1,8 +1,8 @@
 import { Outlet, useLoaderData } from "react-router";
 
-import { Spinner } from "~/components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 
-import { requireAuth } from "~/lib/auth";
+import { requireAuth } from "@/lib/auth";
 
 
 export async function clientLoader() {

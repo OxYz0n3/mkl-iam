@@ -3,14 +3,14 @@ import validator from 'validator';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
-import { Spinner } from '~/components/ui/spinner';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 
-import { app } from '~/lib/api';
+import { app } from '@/lib/api';
 
 
 export default function RegisterPage() {

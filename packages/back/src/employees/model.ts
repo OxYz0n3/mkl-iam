@@ -9,8 +9,8 @@ const _createEmployee = createInsertSchema(table.employees, {
 });
 const _selectEmployee = createSelectSchema(table.employees);
 
-export const TCreateEmployee = t.Omit(_createEmployee, [ 'id', 'createdAt', 'updatedAt' ]);
-export type CreateEmployee   = typeof TCreateEmployee.static;
+export const TAddEmployee = t.Omit(_createEmployee, [ 'id', 'createdAt', 'updatedAt' ]);
+export type AddEmployee   = typeof TAddEmployee.static;
 
 export const TEmployee = t.Object(_selectEmployee.properties, { $id: 'Employee' });
 export type Employee   = typeof TEmployee.static;
