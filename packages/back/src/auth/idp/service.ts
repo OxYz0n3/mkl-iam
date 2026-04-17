@@ -1,3 +1,8 @@
+import { db } from "../../db/db";
+import { table } from "../../db/schema";
+import { CreateTenantIdP, TenantIdP } from "./model";
+
+
 export class IdPService {
     protected static AUTH_URL: string;
     protected static CLIENT_ID: string;
@@ -6,7 +11,7 @@ export class IdPService {
     protected static OAUTH_URL: string;
     protected static CLIENT_SECRET: string;
 
-    static getAuthUrl(state?: string): string
+    static getAuthUrl(state: string): string
     {
         const url = new URL(this.AUTH_URL);
 
@@ -16,9 +21,7 @@ export class IdPService {
         url.searchParams.set('scope', this.SCOPE);
         url.searchParams.set('access_type', 'offline');  // Request refresh token
         url.searchParams.set('prompt', 'consent');  // Force consent to get refresh token
-
-        if (state)
-            url.searchParams.set('state', state);
+        url.searchParams.set('state', state);
 
         return (url.toString());
     }
@@ -38,5 +41,12 @@ export class IdPService {
         });
 
         return (await tokenResponse.json());
+    }
+
+    static async createTenantIdP(idpData: CreateTenantIdP): Promise<TenantIdP>
+    {
+        const [ tenantIdP ] = await db.insert(table.tenantIdp).values(idpData).returning();
+
+        return (tenantIdP);
     }
 }

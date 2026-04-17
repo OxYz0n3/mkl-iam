@@ -56,7 +56,6 @@ export const employees = pgTable("employees", {
 export const tenantIdp = pgTable("tenant_idp", {
     tenantId: uuid('tenant_id').primaryKey().references(() => tenants.id, { onDelete: 'cascade' }),
     provider: idpEnum('provider').notNull(),
-    domain: varchar('domain', { length: 255 }).notNull(),
     encryptedRefreshToken: text('encrypted_refresh_token').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
