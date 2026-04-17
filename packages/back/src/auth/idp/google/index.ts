@@ -9,11 +9,14 @@ import { HTTPError } from "../../../utils/error";
 if (!process.env.FRONTEND_URL)
     throw new Error("FRONTEND_URL environment variable is not set");
 
+if (!process.env.IDP_JWT_SECRET)
+    throw new Error("IDP_JWT_SECRET environment variable is not set");
+
 
 export const google = new Elysia({ prefix: '/google' })
     .use(jwt({
         name: 'idpJwt',
-        secret: process.env.JWT_SECRET!,
+        secret: process.env.IDP_JWT_SECRET!,
         exp: '5m',
     }))
     .get('/callback', async ({ redirect, query: { code, state }, idpJwt }) => {
