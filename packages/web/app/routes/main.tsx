@@ -1,20 +1,15 @@
+import { LayoutDashboard, Settings, Users } from "lucide-react";
 import { Outlet, useOutletContext } from "react-router";
-import { LayoutDashboard, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-
-import type { GetTenantsResponse, Tenant } from "@mkl-iam/back/src/tenants/model";
-import type { User } from "@mkl-iam/back/src/auth/model";
-
-import { app } from "@/lib/api";
-import { getToken } from "@/lib/auth";
-import { Spinner } from "@/components/ui/spinner";
 import { SiteHeader } from "@/components/site-header";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Spinner } from "@/components/ui/spinner";
 import { useTenants } from "@/hooks/use-tenants";
+
+import type { Tenant } from "@mkl-iam/back/src/tenants/model";
+import type { User } from "@mkl-iam/back/src/auth/model";
 
 
 export type MainContext = {
@@ -31,8 +26,13 @@ const menuItems = [
     name: "Employés",
     icon: Users,
     href: "/employees",
+  }, {
+    name: "Paramètres",
+    icon: Settings,
+    href: "/settings",
   }
 ]
+
 
 export default function Main()
 {

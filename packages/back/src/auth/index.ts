@@ -2,9 +2,10 @@ import { Elysia, t } from "elysia";
 import { jwt} from "@elysiajs/jwt";
 
 import { authModels, TAuthCookie, TChangePassword, TCreateUser, TLoginBody } from "./model";
+import { protectedMiddleware } from "../middleware";
 import { ForbiddenError } from "../utils/error";
 import { AuthService } from "./service";
-import { protectedMiddleware } from "../middleware";
+import { idp } from "./idp";
 
 
 if (!process.env['ACCESS_JWT_SECRET'] || !process.env['REFRESH_JWT_SECRET'])
@@ -12,6 +13,7 @@ if (!process.env['ACCESS_JWT_SECRET'] || !process.env['REFRESH_JWT_SECRET'])
 
 
 export const auth = new Elysia({ prefix: "/auth", tags: [ "Auth" ] })
+    .use(idp)
     .use(jwt({
         name: 'accessJwt',
         secret: process.env['ACCESS_JWT_SECRET'],

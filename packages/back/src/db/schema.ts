@@ -1,5 +1,9 @@
-import { pgTable, primaryKey, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core"
+import { jsonb, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
+
+
+export const idpEnum = pgEnum('idp_provider', [ 'google', 'azure' ]);
+export const appEnum = pgEnum('app_provider', [ 'gitlab' ]);
 
 
 export const sessions  = pgTable("sessions", {
@@ -49,10 +53,34 @@ export const employees = pgTable("employees", {
     unique().on(table.email, table.tenantId)
 ]);
 
+export const tenantIdp = pgTable("tenant_idp", {
+    tenantId: uuid('tenant_id').primaryKey().references(() => tenants.id, { onDelete: 'cascade' }),
+    provider: idpEnum('provider').notNull(),
+    domain: varchar('domain', { length: 255 }).notNull(),
+    encryptedRefreshToken: text('encrypted_refresh_token').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const tenantIntegrations = pgTable("tenant_integrations", {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    app: appEnum('app').notNull(),
+    encryptedAccessToken: text('encrypted_access_token').notNull(),
+    encryptedRefreshToken: text('encrypted_refresh_token'),
+    metadata: jsonb('metadata').default({}), 
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+    unique('tenant_app_unique_idx').on(table.tenantId, table.app)
+]);
+
 export const table = {
     sessions,
     tenants,
     users,
     employees,
-    usersToTenants
+    usersToTenants,
+    tenantIdp,
+    tenantIntegrations,
 };

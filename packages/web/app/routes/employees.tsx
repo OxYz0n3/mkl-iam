@@ -32,7 +32,7 @@ export default function Employees() {
     <div className="flex justify-center p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle className="text-2xl font-bold">Gestion des employés</CardTitle>
+          <CardTitle className="text-xl font-bold">Gestion des employés</CardTitle>
           <AddEmployee tenantId={ tenant.id } trigger={
             <Button>
               <Plus className="size-4" />
@@ -45,32 +45,32 @@ export default function Employees() {
             <Table className="min-w-[560px]">
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="px-4 py-3 font-medium">Nom</TableHead>
-                  <TableHead className="px-4 py-3 font-medium">Email</TableHead>
-                  <TableHead className="px-4 py-3 font-medium">Rôle</TableHead>
-                  <TableHead className="px-4 py-3 font-medium text-right">Actions</TableHead>
+                  <TableHead className="px-3 py-2 font-medium">Nom</TableHead>
+                  <TableHead className="px-3 py-2 font-medium">Email</TableHead>
+                  <TableHead className="px-3 py-2 font-medium">Rôle</TableHead>
+                  <TableHead className="px-3 py-2 font-medium text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="px-3 py-2 text-center text-muted-foreground">
                       Chargement des employés...
                     </TableCell>
                   </TableRow>
                 ) : employees.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="px-3 py-2 text-center text-muted-foreground">
                       Aucun employé trouvé.
                     </TableCell>
                   </TableRow>
                 ) : (
                   employees.map((employee) => (
                     <TableRow key={employee.id}>
-                      <TableCell className="px-4 py-3">{`${employee.firstName} ${employee.lastName}`}</TableCell>
-                      <TableCell className="px-4 py-3">{employee.email}</TableCell>
-                      <TableCell className="px-4 py-3">{employee.role}</TableCell>
-                      <TableCell className="px-4 py-3 text-right">
+                      <TableCell className="px-3 py-2">{`${employee.firstName} ${employee.lastName}`}</TableCell>
+                      <TableCell className="px-3 py-2">{employee.email}</TableCell>
+                      <TableCell className="px-3 py-2">{employee.role}</TableCell>
+                      <TableCell className="px-3 py-2 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger render={
                             <Button variant="ghost" size="icon" className="size-8">
