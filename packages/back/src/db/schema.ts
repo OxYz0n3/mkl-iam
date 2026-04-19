@@ -1,10 +1,10 @@
 import { jsonb, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
+import { integrations } from "../utils/integrations";
 
 
 export const idpEnum = pgEnum('idp_provider', [ 'google', 'azure' ]);
-export const appEnum = pgEnum('app_provider', [ 'gitlab' ]);
-
+export const appEnum = pgEnum('app_provider', Object.keys(integrations) as [ keyof typeof integrations ]);
 
 export const sessions  = pgTable("sessions", {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -53,7 +53,7 @@ export const employees = pgTable("employees", {
     unique().on(table.email, table.tenantId)
 ]);
 
-export const tenantIdp = pgTable("tenant_idp", {
+export const tenantIdP = pgTable("tenant_idp", {
     tenantId: uuid('tenant_id').primaryKey().references(() => tenants.id, { onDelete: 'cascade' }),
     provider: idpEnum('provider').notNull(),
     encryptedRefreshToken: text('encrypted_refresh_token').notNull(),
@@ -65,8 +65,7 @@ export const tenantIntegrations = pgTable("tenant_integrations", {
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     app: appEnum('app').notNull(),
-    encryptedAccessToken: text('encrypted_access_token').notNull(),
-    encryptedRefreshToken: text('encrypted_refresh_token'),
+    encryptedRefreshToken: text('encrypted_refresh_token').notNull(),
     metadata: jsonb('metadata').default({}), 
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -74,12 +73,18 @@ export const tenantIntegrations = pgTable("tenant_integrations", {
     unique('tenant_app_unique_idx').on(table.tenantId, table.app)
 ]);
 
+export const authNonces = pgTable("auth_nonces", {
+    nonce: uuid('nonce').primaryKey().defaultRandom(),
+    expiresAt: timestamp('expires_at').notNull().default(sql`now() + interval '15 minutes'`), // Default to 15 minutes from now
+});
+
 export const table = {
     sessions,
     tenants,
     users,
     employees,
     usersToTenants,
-    tenantIdp,
+    tenantIdP,
     tenantIntegrations,
+    authNonces,
 };

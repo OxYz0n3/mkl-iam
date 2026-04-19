@@ -1,14 +1,16 @@
+import { eq } from "drizzle-orm";
 import { db } from "../../db/db";
 import { table } from "../../db/schema";
 import { CreateTenantIdP, TenantIdP } from "./model";
 
 
-export class IdPService {
+export class OAuthService
+{
     protected static AUTH_URL: string;
     protected static CLIENT_ID: string;
     protected static REDIRECT_URI: string;
     protected static SCOPE: string;
-    protected static OAUTH_URL: string;
+    protected static TOKEN_URL: string;
     protected static CLIENT_SECRET: string;
 
     static getAuthUrl(state: string): string
@@ -28,7 +30,7 @@ export class IdPService {
 
     static async getTokensFromAuthorizationCode(code: string): Promise<{ access_token: string, refresh_token: string, expires_in: number }>
     {
-        const tokenResponse = await fetch(this.OAUTH_URL, {
+        const tokenResponse = await fetch(this.TOKEN_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
@@ -43,10 +45,33 @@ export class IdPService {
         return (await tokenResponse.json());
     }
 
+    static async createNonce(): Promise<string>
+    {
+        const [ nonce ] = await db.insert(table.authNonces).values({}).returning();
+
+        return (nonce.nonce);
+    }
+
+    static async verifyNonce(nonce: string): Promise<boolean>
+    {
+        const result = await db.delete(table.authNonces).where(eq(table.authNonces.nonce, nonce)).returning();
+
+        return (result.length > 0);
+    }
+}
+
+export class TenantIdPService extends OAuthService
+{
     static async createTenantIdP(idpData: CreateTenantIdP): Promise<TenantIdP>
     {
-        const [ tenantIdP ] = await db.insert(table.tenantIdp).values(idpData).returning();
+        try {   
+            const [ tenantIdP ] = await db.insert(table.tenantIdP).values(idpData).returning();
+            
+            return (tenantIdP);
+        } catch (error) {
+            console.error("Error creating tenantIdP:", error);
 
-        return (tenantIdP);
+            throw new Error("Failed to create tenantIdP");
+        }
     }
 }

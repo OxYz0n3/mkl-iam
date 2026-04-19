@@ -1,9 +1,10 @@
 import { Elysia, t } from "elysia";
 import { jwt} from "@elysiajs/jwt";
 
-import { GoogleService } from "./service";
+import { BadRequestError, HTTPError } from "../../../utils/error";
 import { protectedMiddleware } from "../../../middleware";
-import { HTTPError } from "../../../utils/error";
+import { TenantService } from "../../../tenants/service";
+import { GoogleService } from "./service";
 
 
 if (!process.env.FRONTEND_URL)
@@ -17,23 +18,28 @@ export const google = new Elysia({ prefix: '/google' })
     .use(jwt({
         name: 'idpJwt',
         secret: process.env.IDP_JWT_SECRET!,
-        exp: '5m',
+        exp: '15m',
     }))
     .get('/callback', async ({ redirect, query: { code, state }, idpJwt }) => {
         const { access_token, refresh_token, expires_in } = await GoogleService.getTokensFromAuthorizationCode(code);
         const statePayload = await idpJwt.verify(state);
 
-        if (!statePayload || !statePayload['tenantId'] || !statePayload['redirectTo'] || !statePayload['userId'])
+        if (!statePayload || !statePayload['tenantId'] || !statePayload['userId'] || !statePayload['nonce'])
             throw new HTTPError("Invalid state parameter");
 
-        //TODO: Verify that tenantId is valid and that the user has access to it
-        const { tenantId, redirectTo, userId } = statePayload as { tenantId: string, redirectTo: string, userId: string };
-        console.log("State payload:", statePayload);
+        const { tenantId, redirectTo, userId, nonce } = statePayload as { tenantId: string, redirectTo?: string, userId: string, nonce: string };
+
+        // Check that user has access to tenantId and that nonce is valid
+        const tenant = await TenantService.getTenantById(userId, tenantId);
+        const nonceValid = await GoogleService.verifyNonce(nonce as string);
+
+        if (!nonceValid)
+            throw new BadRequestError("Invalid nonce");
 
         await GoogleService.createTenantIdP({
             provider: 'google',
             encryptedRefreshToken: refresh_token,  // TODO: Encrypt this token before storing
-            tenantId,
+            tenantId: tenant.id,
         })
 
         const url = new URL(process.env.FRONTEND_URL!);
@@ -49,13 +55,24 @@ export const google = new Elysia({ prefix: '/google' })
         })
     })
     .use(protectedMiddleware)
-    .get('/login', async ({ redirect, query: { redirectTo, tenantId }, user, idpJwt }) => {
-        const state = await idpJwt.sign({ tenantId, redirectTo, userId: user.id });
-        // TODO: Verify that tenantId is valid and that the user has access to it
-        redirect(GoogleService.getAuthUrl(state))
+    .get('/login-url', async ({ query: { redirectTo, tenantId }, user, idpJwt }) => {
+        const state = await idpJwt.sign({
+            nonce: await GoogleService.createNonce(),
+            tenantId: tenantId,
+            userId: user.id,
+            redirectTo,
+        });
+
+        return (GoogleService.getAuthUrl(state));
     }, {
+        beforeHandle: TenantService.tenantBelongsToUser,
         query: t.Object({
             redirectTo: t.Optional(t.String()),
             tenantId: t.String(),
-        })
-    })
+        }),
+        response: {
+            200: t.String({
+                description: "The URL to redirect the user to for Google authentication",
+            }),
+        }
+    });

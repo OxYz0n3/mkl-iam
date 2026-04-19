@@ -1,10 +1,11 @@
 import { cors } from '@elysiajs/cors'
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia';
 
-import { employees } from "./employees";
+import { integrations } from './integrations';
+import { employees } from './employees';
 import { account } from './account';
-import { tenants } from "./tenants"
-import { auth } from "./auth";
+import { tenants } from './tenants'
+import { auth } from './auth';
 import openapi from './openapi';
 
 
@@ -15,6 +16,7 @@ const app = new Elysia()
   .use(account)
   .use(tenants)
   .use(employees)
+  .use(integrations)
   .listen(3000);
 
 console.log(

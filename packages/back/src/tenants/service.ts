@@ -1,12 +1,24 @@
-import { count, eq } from "drizzle-orm";
+import { count, eq, and } from "drizzle-orm";
 
 import { CreateTenant, GetTenantsResponse, Tenant } from "./model";
 import { table } from "../db/schema";
 import { db } from "../db/db";
+import { NotFoundError } from "elysia";
 
 
 export class TenantService
 {
+    static async getTenantById(userId: string, tenantId: string): Promise<Tenant>
+    {
+        const tenants = await this.getUserTenants(userId);
+        const tenant = tenants.find((t) => t.tenant.id === tenantId);
+
+        if (!tenant)
+            throw new NotFoundError('Tenant not found or access denied');
+
+        return (tenant.tenant);
+    }
+
     static async getUserTenants(userId: string): Promise<GetTenantsResponse>
     {
         const tenants = await db.
@@ -37,5 +49,14 @@ export class TenantService
         await db.insert(table.usersToTenants).values({ userId, tenantId: newTenant.id, role: 'owner' });
 
         return (newTenant);
+    }
+
+    static async tenantBelongsToUser({ query: { tenantId }, user }: { query: { tenantId: string }, user: { id: string } }): Promise<void>
+    {
+        const tenants = await TenantService.getUserTenants(user.id);
+        const tenant = tenants.find((t) => t.tenant.id === tenantId);
+
+        if (!tenant)
+            throw new NotFoundError('Tenant not found or access denied');
     }
 }

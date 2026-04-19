@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
@@ -8,6 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 import type { MainContext } from "./main";
+import { app } from "@/lib/api";
+import { getToken } from "@/lib/auth";
+import { toast } from "sonner";
+import { Settings } from "lucide-react";
 
 // --- Logos SVG ---
 const GoogleIcon = () => (
@@ -29,35 +33,49 @@ const MicrosoftIcon = () => (
 );
 
 
-export default function Settings() {
+export default function SettingsPage() {
   const { tenant } = useOutletContext<MainContext>();
-  const [tenantName, setTenantName] = useState(tenant.name || "");
+  const [tenantName, setTenantName] = useState("");
+
+  useEffect(() => {
+    setTenantName(tenant.name);
+  }, [ tenant ]);
 
   const hasNameChanged = tenantName.trim() !== tenant.name && tenantName.trim().length > 0;
 
-  // Fonction pour déclencher le flux OAuth2
-  const handleConnectIdp = (provider: 'google' | 'azure') => {
-    // On récupère l'URL actuelle (ex: '/dashboard/settings')
+  const handleConnectIdp = async (provider: 'google') => {
     const currentPath = window.location.pathname;
-    
-    // On redirige vers ton backend, en passant le chemin de retour dans le state
-    // Remplace par l'URL exacte de ton backend si nécessaire
-    window.location.href = `http://localhost:3000/auth/${provider}/login?redirectTo=${encodeURIComponent(currentPath)}`;
+
+    console.log("Requesting login URL for provider:", provider, "with redirectTo:", currentPath);
+    const { data, error } = await app.auth[provider]['login-url'].get({
+      headers: {
+        Authorization: `Bearer ${ getToken() }`,
+      },
+      query: {
+        redirectTo: currentPath,
+        tenantId: tenant.id,
+      }
+    });
+
+    if (error)
+      toast.error("Failed to get authentication URL. Please try again.");
+    else
+      window.location.href = data;
   };
 
   return (
     <div className="flex justify-center p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Paramètres de l'entreprise</CardTitle>
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <Settings className="w-5 h-5 text-primary" />
+            Paramètres de l'entreprise
+            </CardTitle>
           <CardDescription>
             Gérez les informations de votre espace de travail et vos connexions de sécurité.
           </CardDescription>
         </CardHeader>
-        
         <CardContent className="space-y-8">
-          
-          {/* Section 1 : Informations générales */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Informations générales</h3>
             <Field>
@@ -68,8 +86,6 @@ export default function Settings() {
               />
             </Field>
           </div>
-
-          {/* Section 2 : Single Sign-On (SSO) */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Single Sign-On (SSO)</h3>
             <p className="text-sm text-muted-foreground">
@@ -102,9 +118,7 @@ export default function Settings() {
               </Button>
             </div>
           </div>
-
         </CardContent>
-        
         <CardFooter className="flex justify-end bg-muted/50 pt-6">
           <Button disabled={!hasNameChanged}>
             Enregistrer les modifications

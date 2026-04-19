@@ -1,4 +1,4 @@
-import { LayoutDashboard, Settings, Users } from "lucide-react";
+import { LayoutDashboard, Plug, Settings, Users } from "lucide-react";
 import { Outlet, useOutletContext } from "react-router";
 import { useEffect, useState } from "react";
 
@@ -26,6 +26,10 @@ const menuItems = [
     name: "Employés",
     icon: Users,
     href: "/employees",
+  }, {
+    name: "Intégrations",
+    icon: Plug,
+    href: "/integrations",
   }, {
     name: "Paramètres",
     icon: Settings,
