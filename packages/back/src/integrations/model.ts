@@ -1,8 +1,7 @@
-import { createInsertSchema, createSelectSchema, EnumValuesToEnum } from "drizzle-typebox";
+import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import Elysia, { t } from "elysia";
 
 import { table, appEnum } from "../db/schema";
-import { integrations } from "../utils/integrations";
 
 
 const _createIntegration = createInsertSchema(table.tenantIntegrations);
@@ -17,6 +16,7 @@ export type Integration   = typeof tIntegration.static;
 const tIntegrationValue = t.Object({
     name: t.String(),
     description: t.String(),
+    type: t.Union([ t.Literal('oauth'), t.Literal('accessToken') ]),
 });
 export const tAvailableIntegrations = t.Record(t.String(), tIntegrationValue);
 export type AvailableIntegrations = typeof tAvailableIntegrations.static;

@@ -31,7 +31,7 @@ export class TenantIntegrationService extends OAuthService
                     encryptedRefreshToken: integrationData.encryptedRefreshToken,
                 }
             }).returning();
-            
+
             return (tenantIntegration);
         } catch (error) {
             console.error("Error while creating integration:", error);
