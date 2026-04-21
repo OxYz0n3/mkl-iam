@@ -23,3 +23,15 @@ export const integrations = new Elysia({ prefix: '/integrations', tags: [ 'Integ
             }),
         }
     })
+    .delete('/:integrationId', ({ query: { tenantId }, params: { integrationId } }) => IntegrationService.deleteIntegration(tenantId, integrationId), {
+        beforeHandle: TenantService.tenantBelongsToUser,
+        params: t.Object({
+            integrationId: t.String(),
+        }),
+        query: t.Object({
+            tenantId: t.String(),
+        }),
+        response: {
+            204: t.Void(),
+        }
+    });

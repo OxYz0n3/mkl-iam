@@ -1,10 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { AvailableIntegrations, Integration, AddIntegration } from "./model";
 import { integrations } from "../utils/integrations";
+import { OAuthService } from "../auth/idp/service";
 import { table } from "../db/schema";
 import { db } from "../db/db";
-import { OAuthService } from "../auth/idp/service";
 
 
 export class IntegrationService
@@ -17,6 +17,14 @@ export class IntegrationService
             addedIntegrations,
             availableIntegrations: integrations
         });
+    }
+
+    static async deleteIntegration(tenantId: string, integrationId: string): Promise<void>
+    {
+        const [ deletedIntegration ] = await db.delete(table.tenantIntegrations).where(and(eq(table.tenantIntegrations.id, integrationId), eq(table.tenantIntegrations.tenantId, tenantId))).returning();
+
+        if (!deletedIntegration)
+            throw new Error("Integration not found");
     }
 }
 
