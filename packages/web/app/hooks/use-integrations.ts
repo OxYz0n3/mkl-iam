@@ -5,9 +5,8 @@ import useSWR from "swr";
 export function useIntegrations(tenantId: string)
 {
     return (useSWR([ '/api/integrations', tenantId ], async ([_, tenantId]) => {
-        const { data, error } = await app.integrations.get({
+        const { data, error } = await app.tenants({ tenantId }).integrations.get({
             headers: { Authorization: `Bearer ${ getToken() }` },
-            query: { tenantId }
         });
 
         if (error)

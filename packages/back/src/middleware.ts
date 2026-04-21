@@ -12,13 +12,12 @@ export type UserPayload = {
 }
 
 
-export const protectedMiddleware = (app: Elysia) => 
-    app.use(jwt({
+export const protectedMiddleware = new Elysia({ name: 'protected-middleware' })
+    .use(jwt({
         name: 'accessJwt',
         secret: process.env['ACCESS_JWT_SECRET']!
     }))
-    .guard({ detail: { security: [ { bearerAuth: [] } ] }})
-    .resolve(async ({ headers, accessJwt }) => {
+    .derive({ as: 'scoped' }, async ({ headers, accessJwt }) => {
         const auth = headers.authorization;
 
         if (!auth?.startsWith("Bearer ")) {

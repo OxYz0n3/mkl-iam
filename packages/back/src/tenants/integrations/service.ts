@@ -1,10 +1,10 @@
 import { and, eq } from "drizzle-orm";
 
 import { AvailableIntegrations, Integration, AddIntegration } from "./model";
-import { integrations } from "../utils/integrations";
-import { OAuthService } from "../auth/idp/service";
-import { table } from "../db/schema";
-import { db } from "../db/db";
+import { integrations } from "../../utils/integrations";
+import { OAuthService } from "../../auth/idp/service";
+import { table } from "../../db/schema";
+import { db } from "../../db/db";
 
 
 export class IntegrationService

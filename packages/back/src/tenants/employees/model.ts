@@ -1,7 +1,7 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import Elysia, { t } from "elysia";
 
-import { table } from "../db/schema";
+import { table } from "../../db/schema";
 
 
 const _createEmployee = createInsertSchema(table.employees, {
@@ -9,7 +9,7 @@ const _createEmployee = createInsertSchema(table.employees, {
 });
 const _selectEmployee = createSelectSchema(table.employees);
 
-export const TAddEmployee = t.Omit(_createEmployee, [ 'id', 'createdAt', 'updatedAt' ]);
+export const TAddEmployee = t.Omit(_createEmployee, [ 'id', 'createdAt', 'updatedAt', 'tenantId' ]);
 export type AddEmployee   = typeof TAddEmployee.static;
 
 export const TEmployee = t.Object(_selectEmployee.properties, { $id: 'Employee' });

@@ -12,17 +12,17 @@ export const integrations: Record<IntegrationKey, { name: string; description: s
         description: 'Provisionnez des comptes développeurs et gérez les accès aux groupes.',
         type: 'accessToken',
     },
-    github: {
+    'github': {
         name: 'GitHub',
         description: 'Créez des comptes et gérez les accès à vos organisations GitHub.',
         type: 'oauth',
     },
-    slack: {
+    'slack': {
         name: 'Slack',
         description: 'Invitez automatiquement les nouveaux employés dans votre espace de travail.',
         type: 'oauth',
     },
-    notion: {
+    'notion': {
         name: 'Notion',
         description: 'Créer des comptes et gérez les accès à votre espace d\'équipe Notion.',
         type: 'oauth',

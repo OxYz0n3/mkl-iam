@@ -8,9 +8,8 @@ import { getToken } from '@/lib/auth';
 export function useEmployees(tenantId: string)
 {
     return (useSWR([ '/api/employees', tenantId ], async ([_, tenantId]) => {
-        const { data, error } = await app.employees.get({
-            headers: { Authorization: `Bearer ${ getToken() }` },
-            query: { tenantId }
+        const { data, error } = await app.tenants({ tenantId }).employees.get({
+            headers: { Authorization: `Bearer ${ getToken() }` }
         });
 
         if (error)
@@ -22,28 +21,28 @@ export function useEmployees(tenantId: string)
 
 export function useAddEmployee(tenantId: string)
 {
-    return (useSWRMutation([ '/api/employees', tenantId ], async ([_, tenantId], { arg }: { arg: Omit<Parameters<typeof app.employees.post>[0], "tenantId"> }) => {
-        const { data, error } = await app.employees.post({ ...arg, tenantId }, {
-            headers: { Authorization: `Bearer ${ getToken() }` },
-            query: { tenantId }
+    return (useSWRMutation([ '/api/employees', tenantId ], async ([_, tenantId], { arg }: { arg: Parameters<ReturnType<typeof app.tenants>['employees']['post']>[0] }) => {
+        const { data, error } = await app.tenants({ tenantId }).employees.post(arg, {
+            headers: { Authorization: `Bearer ${ getToken() }` }
         });
 
         if (error)
             throw new Error(error.value.message);
 
         return (data);
-    }, {}));
+    }));
 }
 
 export function useDeleteEmployee(tenantId: string)
 {
     return (useSWRMutation([ '/api/employees', tenantId ], async ([_, tenantId], { arg }: { arg: string }) => {
-        const { error } = await app.employees({ id: arg }).delete(undefined, {
-            headers: { Authorization: `Bearer ${ getToken() }` },
-            query: { tenantId }
+        const { data, error } = await app.tenants({ tenantId }).employees({ employeeId: arg }).delete(undefined, {
+            headers: { Authorization: `Bearer ${ getToken() }` }
         });
 
         if (error)
             throw new Error(error.value.message);
-    }, {}));
+
+        return (data);
+    }));
 }

@@ -51,8 +51,11 @@ export class TenantService
         return (newTenant);
     }
 
-    static async tenantBelongsToUser({ query: { tenantId }, user }: { query: { tenantId: string }, user: { id: string } }): Promise<void>
+    static async tenantBelongsToUser({ params: { tenantId }, user }: { params: { tenantId: string }, user?: { id: string } }): Promise<void>
     {
+        if (!user)
+            throw new NotFoundError('Tenant not found or access denied');
+
         const tenants = await TenantService.getUserTenants(user.id);
         const tenant = tenants.find((t) => t.tenant.id === tenantId);
 

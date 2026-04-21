@@ -13,21 +13,13 @@ import { getToken } from "@/lib/auth";
 import { toast } from "sonner";
 import { Settings } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-
-
-const IdPs = {
-  google: {
-    name: "Google Workspace",
-  },
-  microsoft: {
-    name: "Azure Entra ID",
-  }
-}
+import { useIdentityProviders } from "@/hooks/use-identity";
 
 
 export default function SettingsPage() {
   const { tenant } = useOutletContext<MainContext>();
   const [tenantName, setTenantName] = useState("");
+  const { data: identityProviders } = useIdentityProviders(tenant.id);
 
   const hasNameChanged = tenantName.trim() !== tenant.name && tenantName.trim().length > 0;
 
@@ -84,23 +76,23 @@ export default function SettingsPage() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              { Object.entries(IdPs).map(([providerId, provider]) => (
+              { (Object.keys(identityProviders) as Array<keyof typeof identityProviders>).map((providerId) => (
                 <Card key={ providerId } className="flex flex-col h-full shadow-sm hover:shadow-md transition-shadow p-0">
                   <CardContent className="flex flex-col flex-grow p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex gap-4">
                         <div className="p-2 bg-muted rounded-lg">
-                          <img src={ `/icons/${providerId}.svg` } alt={ provider.name } width={ 32 } height={ 32 } />
+                          <img src={ `/icons/${providerId}.svg` } alt={ identityProviders[providerId].name } width={ 32 } height={ 32 } />
                         </div>
-                        <h3 className="text-lg font-semibold">{provider.name}</h3>
+                        <h3 className="text-lg font-semibold">{identityProviders[providerId].name}</h3>
                       </div>
                     </div>
                     <p className="flex-grow text-sm text-muted-foreground leading-relaxed">
-                      Connectez votre annuaire { provider.name } pour permettre à vos employés de se connecter avec leurs identifiants existants et d'importer automatiquement leurs comptes.
+                      { identityProviders[providerId].description }
                     </p>
                     <Separator className="my-4" />
                     <Button disabled={ providerId != 'google' } className="w-full" onClick={() => handleConnectIdp(providerId) }>
-                      Connecter { provider.name }
+                      Connecter { identityProviders[providerId].name }
                     </Button>
                   </CardContent>
                 </Card>

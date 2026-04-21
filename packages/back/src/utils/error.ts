@@ -12,10 +12,6 @@ export class HTTPError extends Error {
 
 export class NotFoundError extends HTTPError {
     status: number = 404;
-
-    constructor(resource: string) {
-        super(`${resource} not found`);
-    }
 };
 
 export class ForbiddenError extends HTTPError {

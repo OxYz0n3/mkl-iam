@@ -1,9 +1,11 @@
 import { jsonb, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
+
 import { integrations } from "../utils/integrations";
+import { identityProviders } from "../utils/identity";
 
 
-export const idpEnum = pgEnum('idp_provider', [ 'google', 'azure' ]);
+export const idpEnum = pgEnum('idp_provider', Object.keys(identityProviders) as [ keyof typeof identityProviders ]);
 export const appEnum = pgEnum('app_provider', Object.keys(integrations) as [ keyof typeof integrations ]);
 
 export const sessions  = pgTable("sessions", {

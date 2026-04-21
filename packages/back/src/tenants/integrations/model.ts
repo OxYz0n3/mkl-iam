@@ -1,7 +1,7 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import Elysia, { t } from "elysia";
 
-import { table, appEnum } from "../db/schema";
+import { table, appEnum } from "../../db/schema";
 
 
 const _createIntegration = createInsertSchema(table.tenantIntegrations);

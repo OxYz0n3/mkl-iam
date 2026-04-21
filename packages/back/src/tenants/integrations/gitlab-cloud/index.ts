@@ -1,9 +1,9 @@
 import { Elysia, redirect, t } from 'elysia';
 import jwt from '@elysiajs/jwt';
 
-import { BadRequestError, HTTPError } from '../../utils/error';
-import { protectedMiddleware } from '../../middleware';
-import { TenantService } from '../../tenants/service';
+import { BadRequestError, HTTPError } from '../../../utils/error';
+import { protectedMiddleware } from '../../../middleware';
+import { TenantService } from '../../service';
 import { GitlabCloudService } from './service';
 
 
