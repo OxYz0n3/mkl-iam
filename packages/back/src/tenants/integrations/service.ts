@@ -2,12 +2,12 @@ import { and, eq } from "drizzle-orm";
 
 import { AvailableIntegrations, Integration, AddIntegration } from "./model";
 import { integrations } from "../../utils/integrations";
-import { OAuthService } from "../../auth/idp/service";
+import { OAuthService } from "../../utils/oauth_service";
 import { table } from "../../db/schema";
 import { db } from "../../db/db";
 
 
-export class IntegrationService
+export abstract class IntegrationService
 {
     static async getIntegrations(tenantId: string): Promise<{ addedIntegrations: Integration[]; availableIntegrations: AvailableIntegrations }>
     {

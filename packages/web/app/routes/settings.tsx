@@ -27,10 +27,10 @@ export default function SettingsPage() {
     setTenantName(tenant.name);
   }, [ tenant ]);
 
-  const handleConnectIdp = async (provider: 'google') => {
+  const handleConnectIdp = async (provider: keyof typeof identityProviders) => {
     const currentPath = window.location.pathname;
 
-    const { data, error } = await app.auth[provider]['login-url'].get({
+    const { data, error } = await app.tenants({ tenantId: tenant.id }).identity({ provider })['login-url'].get({
       headers: {
         Authorization: `Bearer ${ getToken() }`,
       },

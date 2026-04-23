@@ -5,7 +5,6 @@ import { authModels, TAuthCookie, TChangePassword, TCreateUser, TLoginBody } fro
 import { protectedMiddleware } from "../middleware";
 import { ForbiddenError } from "../utils/error";
 import { AuthService } from "./service";
-import { idp } from "./idp";
 
 
 if (!process.env['ACCESS_JWT_SECRET'] || !process.env['REFRESH_JWT_SECRET'])
@@ -13,7 +12,6 @@ if (!process.env['ACCESS_JWT_SECRET'] || !process.env['REFRESH_JWT_SECRET'])
 
 
 export const auth = new Elysia({ prefix: "/auth", tags: [ "Auth" ] })
-    .use(idp)
     .use(jwt({
         name: 'accessJwt',
         secret: process.env['ACCESS_JWT_SECRET'],

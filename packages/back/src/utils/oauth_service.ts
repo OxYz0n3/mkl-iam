@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../db/db";
-import { table } from "../../db/schema";
-import { CreateTenantIdP, TenantIdP } from "./model";
+
+import { CreateTenantIdP, TenantIdP } from "../tenants/identity/model";
+import { table } from "../db/schema";
+import { db } from "../db/db";
 
 
-export class OAuthService
+export abstract class OAuthService
 {
     protected static AUTH_URL: string;
     protected static CLIENT_ID: string;
@@ -60,7 +61,7 @@ export class OAuthService
     }
 }
 
-export class TenantIdPService extends OAuthService
+export abstract class TenantIdPService extends OAuthService
 {
     static async createTenantIdP(idpData: CreateTenantIdP): Promise<TenantIdP>
     {
