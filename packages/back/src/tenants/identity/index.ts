@@ -3,37 +3,29 @@ import jwt from "@elysiajs/jwt";
 
 import { identityModels, ProviderKey, tIdentityProviderKey } from "./model";
 import { BadRequestError, HTTPError } from "../../utils/error";
-import { TenantIdPService } from "../../utils/oauth_service";
 import { IdentityService } from "./service";
 import { GoogleService } from "./providers";
 import { TenantService } from "../service";
 import { protectedMiddleware } from "../../middleware";
+import { OAuthService } from "../../utils/oauth_service";
 
 
-const providersServiceMap: Record<ProviderKey, typeof TenantIdPService> = {
+const providersServiceMap: Record<ProviderKey, typeof OAuthService> = {
     google: GoogleService,
-    azure: TenantIdPService, // TODO: Implement AzureService and replace this with it
+    azure: OAuthService, // TODO: Implement AzureService and replace this with it
 } as const;
 
+const idpJWTSetup = jwt({
+    name: 'idpJWT',
+    secret: process.env.IDP_JWT_SECRET!,
+    exp: '15m',
+});
 
-export const identity = new Elysia({ prefix: "/identity", tags: [ "Tenants / Identity" ] })
-    .use(identityModels)
-    .use(jwt({
-        name: 'idpJwt',
-        secret: process.env.IDP_JWT_SECRET!,
-        exp: '15m',
-    }))
-    .get("/providers", ({ params: { tenantId } }) => IdentityService.getProviders(tenantId), {
-        params: t.Object({
-            tenantId: t.String({ format: 'uuid' }),
-        }),
-        response: {
-            200: 'IdentityProviders',
-        }
-    })
-    .get('/:provider/callback', async ({ redirect, params: { provider }, query: { code, state }, idpJwt }) => {
+export const identityCallbacks = new Elysia({ prefix: "/identity", tags: [ "Identity Callbacks" ] })
+    .use(idpJWTSetup)
+    .get('/:provider/callback', async ({ redirect, params: { provider }, query: { code, state }, idpJWT }) => {
         const { access_token, refresh_token, expires_in } = await providersServiceMap[provider].getTokensFromAuthorizationCode(code);
-        const statePayload = await idpJwt.verify(state);
+        const statePayload = await idpJWT.verify(state);
 
         if (!statePayload || !statePayload['tenantId'] || !statePayload['userId'] || !statePayload['nonce'])
             throw new HTTPError("Invalid state parameter");
@@ -41,13 +33,13 @@ export const identity = new Elysia({ prefix: "/identity", tags: [ "Tenants / Ide
         const { tenantId, redirectTo, userId, nonce } = statePayload as { tenantId: string, redirectTo?: string, userId: string, nonce: string };
 
         // Check that user has access to tenantId and that nonce is valid
-        const tenant = await TenantService.getTenantById(userId, tenantId);
         const nonceValid = await providersServiceMap[provider].verifyNonce(nonce as string);
+        const tenant = await TenantService.getTenantById(userId, tenantId);
 
         if (!nonceValid)
             throw new BadRequestError("Invalid nonce");
 
-        await providersServiceMap[provider].createTenantIdP({
+        await IdentityService.createTenantIdP({
             provider,
             encryptedRefreshToken: refresh_token,  // TODO: Encrypt this token before storing
             tenantId: tenant.id,
@@ -67,10 +59,22 @@ export const identity = new Elysia({ prefix: "/identity", tags: [ "Tenants / Ide
             code: t.String(),
             state: t.String(),
         })
-    })
+    });
+
+export const identity = new Elysia({ prefix: "/identity", tags: [ "Tenants / Identity" ] })
     .use(protectedMiddleware)
-    .get('/:provider/login-url', async ({ params: { provider }, query: { redirectTo, tenantId }, user, idpJwt }) => {
-        const state = await idpJwt.sign({
+    .use(identityModels)
+    .use(idpJWTSetup)
+    .get("/providers", ({ params: { tenantId } }) => IdentityService.getProviders(tenantId), {
+        params: t.Object({
+            tenantId: t.String({ format: 'uuid' }),
+        }),
+        response: {
+            200: 'IdentityProviders',
+        }
+    })
+    .get('/:provider/login-url', async ({ params: { provider }, query: { redirectTo, tenantId }, user, idpJWT }) => {
+        const state = await idpJWT.sign({
             nonce: await providersServiceMap[provider].createNonce(),
             tenantId: tenantId,
             userId: user.id,

@@ -60,19 +60,3 @@ export abstract class OAuthService
         return (result.length > 0);
     }
 }
-
-export abstract class TenantIdPService extends OAuthService
-{
-    static async createTenantIdP(idpData: CreateTenantIdP): Promise<TenantIdP>
-    {
-        try {   
-            const [ tenantIdP ] = await db.insert(table.tenantIdP).values(idpData).returning();
-            
-            return (tenantIdP);
-        } catch (error) {
-            console.error("Error creating tenantIdP:", error);
-
-            throw new Error("Failed to create tenantIdP");
-        }
-    }
-}
