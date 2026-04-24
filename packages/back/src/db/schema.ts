@@ -75,10 +75,6 @@ export const tenantIntegrations = pgTable("tenant_integrations", {
     unique('tenant_app_unique_idx').on(table.tenantId, table.app)
 ]);
 
-export const authNonces = pgTable("auth_nonces", {
-    nonce: uuid('nonce').primaryKey().defaultRandom(),
-    expiresAt: timestamp('expires_at').notNull().default(sql`now() + interval '15 minutes'`), // Default to 15 minutes from now
-});
 
 export const table = {
     sessions,
@@ -88,5 +84,4 @@ export const table = {
     usersToTenants,
     tenantIdP,
     tenantIntegrations,
-    authNonces,
 };

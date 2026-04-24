@@ -1,6 +1,5 @@
-import { eq } from "drizzle-orm";
+import { redis, randomUUIDv7 } from "bun";
 
-import { CreateTenantIdP, TenantIdP } from "../tenants/identity/model";
 import { table } from "../db/schema";
 import { db } from "../db/db";
 
@@ -29,9 +28,9 @@ export abstract class OAuthService
         return (url.toString());
     }
 
-    static async getTokensFromAuthorizationCode(code: string): Promise<{ access_token: string, refresh_token: string, expires_in: number }>
+    static async getTokensFromAuthorizationCode(tenantId: string, code: string): Promise<{ access_token: string; expires_in: number; refresh_token: string; refresh_token_expires_in?: number; scope: string; token_type: string }>
     {
-        const tokenResponse = await fetch(this.TOKEN_URL, {
+        const response = await fetch(this.TOKEN_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
@@ -43,20 +42,68 @@ export abstract class OAuthService
             }),
         });
 
-        return (await tokenResponse.json());
+        if (!response.ok)
+            throw new Error(`Failed to exchange authorization code for tokens: ${await response.text()}`);
+
+        const tokenData = await response.json();
+
+        if (tokenData.scope != this.SCOPE)
+            throw new Error(`Invalid scope: ${tokenData.scope}`);
+
+        await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
+
+        return (tokenData);
     }
 
     static async createNonce(): Promise<string>
     {
-        const [ nonce ] = await db.insert(table.authNonces).values({}).returning();
+        const nonce = randomUUIDv7();
 
-        return (nonce.nonce);
+        await redis.set(`nonce:${ nonce }`, 'valid', 'EX', 10 * 60);  // Store nonce in Redis with 10 minute expiration
+
+        return (nonce);
     }
 
     static async verifyNonce(nonce: string): Promise<boolean>
     {
-        const result = await db.delete(table.authNonces).where(eq(table.authNonces.nonce, nonce)).returning();
+        const cachedNonce = await redis.get(`nonce:${nonce}`);
 
-        return (result.length > 0);
+        if (!cachedNonce)
+            return (false);
+
+        await redis.del(`nonce:${nonce}`);
+
+        return (true);
+    }
+
+    static async getAccessToken(tenantId: string, refreshToken: string): Promise<string>
+    {
+        const cachedToken = await redis.get(`idp_access_token:${ tenantId }`);
+
+        if (cachedToken)
+            return (cachedToken);
+
+        const response = await fetch(this.TOKEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                client_id: this.CLIENT_ID,
+                client_secret: this.CLIENT_SECRET,
+                refresh_token: refreshToken,
+                grant_type: 'refresh_token',
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Failed to exchange refresh token for access token: ${await response.text()}`);
+
+        const tokenData = await response.json();
+
+        if (tokenData.scope != this.SCOPE)
+            throw new Error(`Invalid scope: ${tokenData.scope}`);
+
+        await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
+
+        return (tokenData);
     }
 }

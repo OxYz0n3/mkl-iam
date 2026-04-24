@@ -18,14 +18,12 @@ import { useIdentityProviders } from "@/hooks/use-identity";
 
 export default function SettingsPage() {
   const { tenant } = useOutletContext<MainContext>();
-  const [tenantName, setTenantName] = useState("");
+  const [ tenantName, setTenantName ] = useState("");
   const { data: identityProviders } = useIdentityProviders(tenant.id);
 
   const hasNameChanged = tenantName.trim() !== tenant.name && tenantName.trim().length > 0;
 
-  useEffect(() => {
-    setTenantName(tenant.name);
-  }, [ tenant ]);
+  useEffect(() => setTenantName(tenant.name), [ tenant ]);
 
   const handleConnectIdp = async (provider: keyof typeof identityProviders) => {
     const currentPath = window.location.pathname;
