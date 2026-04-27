@@ -1,5 +1,5 @@
 import { LayoutDashboard, Plug, Settings, Users } from "lucide-react";
-import { Outlet, useOutletContext } from "react-router";
+import { Outlet, redirect, useNavigate, useOutletContext } from "react-router";
 import { useEffect, useState } from "react";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -23,9 +23,9 @@ const menuItems = [
     icon: LayoutDashboard,
     href: "/",
   }, {
-    name: "Employés",
+    name: "Utilisateurs",
     icon: Users,
-    href: "/employees",
+    href: "/users",
   }, {
     name: "Intégrations",
     icon: Plug,
@@ -41,11 +41,16 @@ const menuItems = [
 export default function Main()
 {
   const { data: tenants, isLoading } = useTenants();
-
   const [ activeTenant, setActiveTenant ] = useState<Tenant | null>(null);
   const { user } = useOutletContext() as { user: User };
+  const navigate = useNavigate();
 
-  useEffect(() => setActiveTenant(tenants[0]?.tenant ?? null), [ tenants ]);
+  useEffect(() => {
+    setActiveTenant(tenants[0]?.tenant ?? null);
+
+    if (!isLoading && !tenants.length)
+      navigate("/add-tenant");
+  }, [ tenants ]);
 
   return (
     <SidebarProvider>

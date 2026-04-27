@@ -6,7 +6,7 @@ export default [
         route("add-tenant", "routes/add-tenant.tsx"),
         layout("routes/main.tsx", [
             index("routes/dashboard.tsx"),
-            route("employees", "routes/employees.tsx"),
+            route("users", "routes/users.tsx"),
             route("integrations", "routes/integrations.tsx"),
             route("settings", "routes/settings.tsx"),
         ])

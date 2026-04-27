@@ -1,7 +1,7 @@
 import { redis, randomUUIDv7 } from "bun";
 
-import { table } from "../db/schema";
-import { db } from "../db/db";
+import { IdentityService } from "../tenants/identity/service";
+import { AddUser } from "../tenants/users/model";
 
 
 export abstract class OAuthService
@@ -28,7 +28,7 @@ export abstract class OAuthService
         return (url.toString());
     }
 
-    static async getTokensFromAuthorizationCode(tenantId: string, code: string): Promise<{ access_token: string; expires_in: number; refresh_token: string; refresh_token_expires_in?: number; scope: string; token_type: string }>
+    static async getTokensFromAuthorizationCode(tenantId: string, code: string): Promise<{ access_token: string; refresh_token: string; }>
     {
         const response = await fetch(this.TOKEN_URL, {
             method: 'POST',
@@ -76,12 +76,17 @@ export abstract class OAuthService
         return (true);
     }
 
-    static async getAccessToken(tenantId: string, refreshToken: string): Promise<string>
+    static async getAccessToken(tenantId: string): Promise<string>
     {
         const cachedToken = await redis.get(`idp_access_token:${ tenantId }`);
 
         if (cachedToken)
             return (cachedToken);
+
+        const tenantIdP = await IdentityService.getTenantIdP(tenantId);
+
+        if (!tenantIdP)
+            throw new Error("No identity provider configured for this tenant");
 
         const response = await fetch(this.TOKEN_URL, {
             method: 'POST',
@@ -89,7 +94,7 @@ export abstract class OAuthService
             body: new URLSearchParams({
                 client_id: this.CLIENT_ID,
                 client_secret: this.CLIENT_SECRET,
-                refresh_token: refreshToken,
+                refresh_token: tenantIdP.encryptedRefreshToken,
                 grant_type: 'refresh_token',
             }),
         });
@@ -104,6 +109,16 @@ export abstract class OAuthService
 
         await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
 
-        return (tokenData);
+        return (tokenData.access_token);
+    }
+
+    static async getUsers(tenantId: string, accessToken: string): Promise<AddUser[]>
+    {
+        return ([]);
+    }
+
+    static async createUser(tenantId: string, newUser: AddUser): Promise<AddUser>
+    {
+        throw new Error("Not implemented");
     }
 }

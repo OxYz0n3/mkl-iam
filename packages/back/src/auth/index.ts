@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { jwt} from "@elysiajs/jwt";
+import { jwt } from "@elysiajs/jwt";
 
 import { authModels, TAuthCookie, TChangePassword, TCreateUser, TLoginBody } from "./model";
 import { protectedMiddleware } from "../middleware";

@@ -12,25 +12,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { useDeleteEmployee } from "@/hooks/use-employees";
+import { useDeleteUser } from "@/hooks/use-users";
 import { toast } from "sonner";
 
 
-export function DeleteEmployee({
-  tenantId, employeeId, openState
+export function DeleteUser({
+  tenantId, userId, openState
 }: {
-  tenantId: string; employeeId: string; openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
+  tenantId: string; userId: string; openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
 }) {
-  const { trigger: deleteEmployee, isMutating: isDeletingEmployee } = useDeleteEmployee(tenantId);
+  const { trigger: deleteUser, isMutating: isDeletingUser } = useDeleteUser(tenantId);
   const [ open, setOpen ] = openState;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Supprimer un employé</DialogTitle>
+          <DialogTitle>Supprimer un utilisateur</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer cet employé ? Cette action est irréversible.
+            Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -38,13 +38,13 @@ export function DeleteEmployee({
             <Button variant="outline">Fermer</Button>
           } />
           <Button
-            disabled={ isDeletingEmployee }
+            disabled={ isDeletingUser }
             onClick={ async () => {
-              await deleteEmployee(employeeId);
-              toast.success("Employé supprimé avec succès !");
+              await deleteUser(userId);
+              toast.success("Utilisateur supprimé avec succès !");
               setOpen(false);
             } }>
-            { isDeletingEmployee ? <><Spinner /> Suppression en cours...</> : "Supprimer" }
+            { isDeletingUser ? <><Spinner /> Suppression en cours...</> : "Supprimer" }
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -88,7 +88,7 @@ export function TenantsSwitcher({
                 </Avatar>
                 { tenant.tenant.name }
                 <div className="p-1 ml-auto flex items-center rounded-md border bg-transparent px-1 text-md text-muted-foreground font-semibold">
-                  { tenant.employeeCount }
+                  { tenant.userCount }
                   <Users className="ms-1 size-4" />
                 </div>
               </DropdownMenuItem>

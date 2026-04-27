@@ -1,29 +1,40 @@
 import { useOutletContext } from "react-router";
 import { useEffect, useState } from "react";
+import { Settings } from "lucide-react";
+import validator from "validator";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
+import { useDeleteIdentity, useIdentity, useIdentityProviders } from "@/hooks/use-identity";
 import type { MainContext } from "./main";
-import { app } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { toast } from "sonner";
-import { Settings } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { useIdentityProviders } from "@/hooks/use-identity";
+import { app } from "@/lib/api";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 
 export default function SettingsPage() {
   const { tenant } = useOutletContext<MainContext>();
   const [ tenantName, setTenantName ] = useState("");
+  const [ tenantDomain, setTenantDomain ] = useState("");
+
+  const { data: tenantIdP, isLoading: isTenantIdPLoading } = useIdentity(tenant.id);
   const { data: identityProviders } = useIdentityProviders(tenant.id);
+  const { trigger: deleteIdentity } = useDeleteIdentity(tenant.id);
 
   const hasNameChanged = tenantName.trim() !== tenant.name && tenantName.trim().length > 0;
+  const hasDomainChanged = tenantDomain.trim() !== tenant.domain && tenantDomain.trim().length > 0;
+  const hasGeneralInfoChanged = hasNameChanged || hasDomainChanged;
 
-  useEffect(() => setTenantName(tenant.name), [ tenant ]);
+  useEffect(() => {
+    setTenantName(tenant.name);
+    setTenantDomain(tenant.domain);
+  }, [ tenant ]);
 
   const handleConnectIdp = async (provider: keyof typeof identityProviders) => {
     const currentPath = window.location.pathname;
@@ -51,7 +62,7 @@ export default function SettingsPage() {
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Settings className="w-5 h-5 text-primary" />
             Paramètres de l'entreprise
-            </CardTitle>
+          </CardTitle>
           <CardDescription>
             Gérez les informations de votre espace de travail et vos connexions de sécurité.
           </CardDescription>
@@ -59,13 +70,23 @@ export default function SettingsPage() {
         <CardContent className="space-y-8">
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Informations générales</h3>
-            <Field>
-              <Label>Nom de l'entreprise</Label>
-              <Input 
-                value={tenantName}
-                onChange={(e) => setTenantName(e.target.value)}
-              />
-            </Field>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Field>
+                <Label>Nom de l'entreprise</Label>
+                <Input 
+                  value={tenantName}
+                  onChange={(e) => setTenantName(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <Label>Nom de domaine</Label>
+                <Input 
+                  value={tenantDomain}
+                  aria-invalid={ !!tenantDomain && !validator.isFQDN(tenantDomain) }
+                  onChange={(e) => setTenantDomain(e.target.value)}
+                />
+              </Field>
+            </div>
           </div>
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Single Sign-On (SSO)</h3>
@@ -89,9 +110,38 @@ export default function SettingsPage() {
                       { identityProviders[providerId].description }
                     </p>
                     <Separator className="my-4" />
-                    <Button disabled={ providerId != 'google' } className="w-full" onClick={() => handleConnectIdp(providerId) }>
-                      Connecter { identityProviders[providerId].name }
-                    </Button>
+                    { tenantIdP?.provider === providerId ? (
+                      <Dialog>
+                        <DialogTrigger>
+                          <Button variant="outline" className="w-full">
+                            Gérer { identityProviders[providerId].name }
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-xl">
+                          <DialogHeader>
+                            <DialogTitle>Gérer la connexion { identityProviders[providerId].name }</DialogTitle>
+                          </DialogHeader>
+                          <DialogFooter className="sm:flex-wrap">
+                            <DialogClose>
+                              <Button variant="outline">
+                                Fermer
+                              </Button>
+                            </DialogClose>
+                            <Button onClick={() => handleConnectIdp(providerId) } className="w-full sm:w-auto">
+                              Reconnecter { identityProviders[providerId].name }
+                            </Button>
+                            <Button variant="destructive" onClick={() => deleteIdentity() } className="w-full whitespace-normal text-center leading-tight sm:w-auto">
+                              Supprimer la connexion { identityProviders[providerId].name }
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      <Button disabled={ !!tenantIdP || isTenantIdPLoading } className="w-full" onClick={() => handleConnectIdp(providerId) }>
+                        Connecter { identityProviders[providerId].name }
+                      </Button>
+                    )
+                    }
                   </CardContent>
                 </Card>
               )) }
@@ -99,7 +149,7 @@ export default function SettingsPage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-end bg-muted/50">
-          <Button disabled={!hasNameChanged}>
+          <Button disabled={!hasGeneralInfoChanged || !validator.isFQDN(tenantDomain)}>
             Enregistrer les modifications
           </Button>
         </CardFooter>

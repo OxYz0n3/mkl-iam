@@ -4,8 +4,8 @@ import { tCreateTenant, tGetTenantsResponse, tTenant } from "./model";
 import { protectedMiddleware } from "../middleware";
 import { integrations } from "./integrations";
 import { TenantService } from "./service";
-import { employees } from "./employees";
 import { identity } from "./identity";
+import { users } from "./users";
 
 
 export const tenants = new Elysia({ prefix: "/tenants", tags: [ "Tenants" ] })
@@ -28,7 +28,7 @@ export const tenants = new Elysia({ prefix: "/tenants", tags: [ "Tenants" ] })
             tenantId: t.String({ format: 'uuid' }),
         }),
     }, (app) => app
-        .use(employees)
+        .use(users)
         .use(integrations)
         .use(identity)
     );

@@ -1,12 +1,11 @@
 import { Elysia, t } from "elysia";
 import jwt from "@elysiajs/jwt";
 
-import { identityModels, ProviderKey, tIdentityProviderKey } from "./model";
+import { identityModels, tIdentityProviderKey, tTenantIdP } from "./model";
 import { BadRequestError, HTTPError } from "../../utils/error";
-import { OAuthService } from "../../utils/oauth_service";
 import { protectedMiddleware } from "../../middleware";
+import { providersServiceMap } from "./providers";
 import { IdentityService } from "./service";
-import { GoogleService } from "./providers";
 import { TenantService } from "../service";
 
 
@@ -15,11 +14,6 @@ if (!process.env.IDP_JWT_SECRET)
 if (!process.env.FRONTEND_URL)
     throw new Error("FRONTEND_URL must be set in environment variables");
 
-
-const providersServiceMap: Record<ProviderKey, typeof OAuthService> = {
-    google: GoogleService,
-    azure: OAuthService, // TODO: Implement AzureService and replace this with it
-} as const;
 
 const idpJWTSetup = jwt({
     name: 'idpJWT',
@@ -40,23 +34,26 @@ export const identityCallbacks = new Elysia({ prefix: "/identity", tags: [ "Iden
 
         // Check that user has access to tenantId and that nonce is valid
         const nonceValid = await providersServiceMap[provider].verifyNonce(nonce as string);
-        const tenant = await TenantService.getTenantById(userId, tenantId);
 
         if (!nonceValid)
             throw new BadRequestError("Invalid nonce");
 
-        const { access_token, refresh_token, expires_in } = await providersServiceMap[provider].getTokensFromAuthorizationCode(tenantId, code);
+        await TenantService.tenantBelongsToUser({ params: { tenantId }, user: { id: userId } });
+
+        const { access_token, refresh_token } = await providersServiceMap[provider].getTokensFromAuthorizationCode(tenantId, code);
 
         await IdentityService.createTenantIdP({
             provider,
             encryptedRefreshToken: refresh_token,  // TODO: Encrypt this token before storing
-            tenantId: tenant.id,
+            tenantId: tenantId,
         });
 
         const url = new URL(process.env.FRONTEND_URL!);
 
         if (redirectTo)
             url.pathname = redirectTo;
+
+        // const users = await providersServiceMap[provider].getUsers(tenantId, access_token);
 
         return (redirect(url.toString()));
     }, {
@@ -72,7 +69,22 @@ export const identityCallbacks = new Elysia({ prefix: "/identity", tags: [ "Iden
 export const identity = new Elysia({ prefix: "/identity", tags: [ "Tenants / Identity" ] })
     .use(protectedMiddleware)
     .use(identityModels)
-    .use(idpJWTSetup)
+    .get('/', ({ params: { tenantId } }) => IdentityService.getTenantIdP(tenantId), {
+        params: t.Object({
+            tenantId: t.String({ format: 'uuid' }),
+        }),
+        response: {
+            200: t.Nullable(tTenantIdP, { description: "Returns the tenant's identity provider configuration if it exists, otherwise null" }),
+        }
+    })
+    .delete('/', async ({ params: { tenantId } }) => IdentityService.deleteTenantIdP(tenantId), {
+        params: t.Object({
+            tenantId: t.String({ format: 'uuid' }),
+        }),
+        response: {
+            204: t.Void(),
+        }
+    })
     .get("/providers", ({ params: { tenantId } }) => IdentityService.getProviders(tenantId), {
         params: t.Object({
             tenantId: t.String({ format: 'uuid' }),
@@ -81,6 +93,7 @@ export const identity = new Elysia({ prefix: "/identity", tags: [ "Tenants / Ide
             200: 'IdentityProviders',
         }
     })
+    .use(idpJWTSetup)
     .get('/:provider/login-url', async ({ params: { provider }, query: { redirectTo, tenantId }, user, idpJWT }) => {
         const state = await idpJWT.sign({
             nonce: await providersServiceMap[provider].createNonce(),

@@ -21,6 +21,7 @@ export const tenants   = pgTable("tenants", {
     name: varchar('name', { length: 255 }).notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    domain: varchar('domain', { length: 255 }).notNull().unique(),
 });
 
 export const users     = pgTable("users", {
@@ -42,17 +43,18 @@ export const usersToTenants = pgTable('users_to_tenants', {
     primaryKey({ columns: [ table.userId, table.tenantId ] })
 ]);
 
-export const employees = pgTable("employees", {
+export const tenantUsers = pgTable("tenant_users", {
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }).notNull(),
     firstName: varchar('first_name', { length: 100 }).notNull(),
     lastName: varchar('last_name', { length: 100 }).notNull(),
-    email: varchar('email', { length: 255 }).notNull(),
+    primaryEmail: varchar('primary_email', { length: 255 }).notNull(),
+    secondaryEmail: varchar('secondary_email', { length: 255 }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
     role: varchar('role', { length: 100 }),
 }, (table) => [
-    unique().on(table.email, table.tenantId)
+    unique().on(table.primaryEmail, table.tenantId)
 ]);
 
 export const tenantIdP = pgTable("tenant_idp", {
@@ -80,7 +82,7 @@ export const table = {
     sessions,
     tenants,
     users,
-    employees,
+    tenantUsers,
     usersToTenants,
     tenantIdP,
     tenantIntegrations,

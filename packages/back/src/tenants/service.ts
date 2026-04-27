@@ -26,11 +26,11 @@ export class TenantService
                 tenant: table.tenants,
                 role: table.usersToTenants.role,
                 joinedAt: table.usersToTenants.joinedAt,
-                employeeCount: count(table.employees.id),
+                userCount: count(table.tenantUsers.id),
             })
             .from(table.usersToTenants)
             .innerJoin(table.tenants, eq(table.usersToTenants.tenantId, table.tenants.id))
-            .leftJoin(table.employees, eq(table.employees.tenantId, table.tenants.id))
+            .leftJoin(table.tenantUsers, eq(table.tenantUsers.tenantId, table.tenants.id))
             .where(eq(table.usersToTenants.userId, userId))
             .groupBy(
                 table.tenants.id,

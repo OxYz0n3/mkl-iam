@@ -18,3 +18,17 @@ export function useTenants()
         return (data);
     }, { fallbackData: [] }));
 }
+
+export function useAddTenant()
+{
+    return (useSWRMutation('/api/tenants', async (_, { arg }: { arg: Parameters<typeof app.tenants.post>[0] }) => {
+        const { data, error } = await app.tenants.post(arg, {
+            headers: { Authorization: `Bearer ${ getToken() }` }
+        });
+
+        if (error)
+            throw new Error(error.value.message);
+
+        return (data);
+    }));
+}
