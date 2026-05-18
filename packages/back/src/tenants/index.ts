@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 
-import { tCreateTenant, tGetTenantsResponse, tTenant } from "./model";
 import { protectedMiddleware } from "../middleware";
+import { tCreateTenant, tTenant } from "./model";
 import { integrations } from "./integrations";
 import { TenantService } from "./service";
 import { identity } from "./identity";
@@ -13,7 +13,7 @@ export const tenants = new Elysia({ prefix: "/tenants", tags: [ "Tenants" ] })
     .guard({ detail: { security: [ { bearerAuth: [] } ] }})
     .get('/', ({ user }) => TenantService.getUserTenants(user.id), {
         response: {
-            200: tGetTenantsResponse
+            200: t.Array(tTenant)
         }
     })
     .post('/', ({ user, body }) => TenantService.addTenant(user.id, body), {
@@ -28,6 +28,16 @@ export const tenants = new Elysia({ prefix: "/tenants", tags: [ "Tenants" ] })
             tenantId: t.String({ format: 'uuid' }),
         }),
     }, (app) => app
+        .delete('/', async ({ params: { tenantId }, status }) => {
+            await TenantService.deleteTenant(tenantId);
+
+            return (status(204, undefined));
+        }, {
+            beforeHandle: TenantService.tenantOwnedByUser,
+            response: {
+                204: t.Void()
+            }
+        })
         .use(users)
         .use(integrations)
         .use(identity)

@@ -28,6 +28,3 @@ export const tTenant = t.Composite([
 ]);
 
 export type Tenant = Static<typeof tTenant>;
-
-export const tGetTenantsResponse = t.Array(tTenant);
-export type GetTenantsResponse = Static<typeof tGetTenantsResponse>;

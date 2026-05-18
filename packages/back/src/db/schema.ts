@@ -7,6 +7,7 @@ import { identityProviders } from "../utils/identity";
 
 export const idpEnum = pgEnum('idp_provider', Object.keys(identityProviders) as [ keyof typeof identityProviders ]);
 export const appEnum = pgEnum('app_provider', Object.keys(integrations) as [ keyof typeof integrations ]);
+export const tenantRoleEnum = pgEnum('tenant_role', [ 'owner', 'admin', 'member']);
 
 export const sessions  = pgTable("sessions", {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -37,7 +38,7 @@ export const users     = pgTable("users", {
 export const usersToTenants = pgTable('users_to_tenants', {
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-    role: varchar('role', { length: 50 }).notNull().default('member'),
+    role: tenantRoleEnum('role').notNull(),
     joinedAt: timestamp('joined_at').notNull().defaultNow(),
 }, (table) => [
     primaryKey({ columns: [ table.userId, table.tenantId ] })

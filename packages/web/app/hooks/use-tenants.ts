@@ -49,3 +49,30 @@ export function useAddTenant()
         trigger: triggerAndForceRefresh
     })
 }
+
+export function useDeleteTenant(tenantId: string)
+{
+    const { mutate } = useTenants();
+
+    const mutation = useSWRMutation('/api/tenants', async () => {
+        const { error } = await app.tenants({ tenantId }).delete(undefined, {
+            headers: { Authorization: `Bearer ${ getToken() }` }
+        });
+
+        if (error)
+            throw new Error(error.value.message);
+    });
+
+    const triggerAndForceRefresh = async () => {
+        const result = await mutation.trigger();
+
+        await mutate(undefined, { revalidate: true });
+
+        return (result);
+    }
+
+    return ({
+        ...mutation,
+        trigger: triggerAndForceRefresh
+    })
+}

@@ -4,7 +4,9 @@ import { Settings } from "lucide-react";
 import validator from "validator";
 import { toast } from "sonner";
 
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import DeleteTenant from "@/components/dialogs/delete-tenant";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -15,7 +17,6 @@ import { useDeleteIdentity, useIdentity, useIdentityProviders } from "@/hooks/us
 import type { MainContext } from "./main";
 import { getToken } from "@/lib/auth";
 import { app } from "@/lib/api";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 
 export default function SettingsPage() {
@@ -149,9 +150,7 @@ export default function SettingsPage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-end bg-muted/50 justify-between">
-          <Button variant="destructive">
-            Supprimer l'entreprise
-          </Button>
+          <DeleteTenant tenant={ tenant } />
           <Button disabled={!hasGeneralInfoChanged || !validator.isFQDN(tenantDomain)}>
             Enregistrer les modifications
           </Button>

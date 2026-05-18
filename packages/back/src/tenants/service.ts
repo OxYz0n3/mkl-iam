@@ -1,9 +1,10 @@
 import { count, eq, and, sql, getTableColumns } from "drizzle-orm";
 
-import { CreateTenant, GetTenantsResponse, Tenant } from "./model";
+import { CreateTenant, Tenant } from "./model";
 import { table } from "../db/schema";
 import { db } from "../db/db";
 import { NotFoundError } from "elysia";
+import { ForbiddenError } from "../utils/error";
 
 
 export class TenantService
@@ -19,7 +20,7 @@ export class TenantService
         return (tenant);
     }
 
-    static async getUserTenants(userId: string): Promise<GetTenantsResponse>
+    static async getUserTenants(userId: string): Promise<Tenant[]>
     {
         const tenants = await db.
             select({
@@ -43,11 +44,27 @@ export class TenantService
         return (tenants);
     }
 
-    static async addTenant(userId: string, tenant: CreateTenant): Promise<void>
+    static async addTenant(userId: string, tenant: CreateTenant): Promise<Tenant>
     {
         const [ newTenant ] = await db.insert(table.tenants).values(tenant).returning();
 
-        await db.insert(table.usersToTenants).values({ userId, tenantId: newTenant.id, role: 'owner' });
+        const [ newTenantUser ] = await db.insert(table.usersToTenants).values({ userId, tenantId: newTenant.id, role: 'owner' }).returning();
+
+        return ({
+            ...newTenant,
+            isIdPSynced: false,
+            role: newTenantUser.role,
+            joinedAt: newTenantUser.joinedAt,
+            userCount: 0,
+        });
+    }
+
+    static async deleteTenant(tenantId: string): Promise<void>
+    {
+        const [ deletedTenant ] = await db.delete(table.tenants).where(eq(table.tenants.id, tenantId)).returning();
+
+        if (!deletedTenant)
+            throw new NotFoundError('Tenant not found');
     }
 
     static async tenantBelongsToUser({ params: { tenantId }, user }: { params: { tenantId: string }, user?: { id: string } }): Promise<void>
@@ -60,5 +77,20 @@ export class TenantService
 
         if (!tenant)
             throw new NotFoundError('Tenant not found or access denied');
+    }
+
+    static async tenantOwnedByUser({ params: { tenantId }, user }: { params: { tenantId: string }, user?: { id: string } }): Promise<void>
+    {
+        if (!user)
+            throw new NotFoundError('Tenant not found or access denied');
+
+        const tenants = await TenantService.getUserTenants(user.id);
+        const tenant = tenants.find((t) => t.id === tenantId);
+
+        if (!tenant)
+            throw new NotFoundError('Tenant not found or access denied');
+
+        if (tenant.role != 'owner')
+            throw new ForbiddenError('You are not the owner of this tenant')
     }
 }
