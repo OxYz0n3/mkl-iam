@@ -18,6 +18,8 @@ import type { MainContext } from "./main";
 import { getToken } from "@/lib/auth";
 import { app } from "@/lib/api";
 
+import { m } from "@/paraglide/messages";
+
 
 export default function SettingsPage() {
   const { tenant } = useOutletContext<MainContext>();
@@ -62,7 +64,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Settings className="w-5 h-5 text-primary" />
-            Paramètres de l'entreprise
+            { m.tenant_settings() }
           </CardTitle>
           <CardDescription>
             Gérez les informations de votre espace de travail et vos connexions de sécurité.
@@ -90,7 +92,9 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Fournisseurs d'identité (IdP)</h3>
+            <h3 className="text-lg font-medium border-b pb-2">
+              { m.idp() }
+            </h3>
             <p className="text-sm text-muted-foreground">
               Liez un annuaire externe pour permettre à vos employés de se connecter en un clic et d'importer leurs comptes.
             </p>
@@ -115,7 +119,7 @@ export default function SettingsPage() {
                       <Dialog>
                         <DialogTrigger>
                           <Button variant="outline" className="w-full">
-                            Gérer { identityProviders[providerId].name }
+                            { m.manage_object({ object: identityProviders[providerId].name })}
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-xl">
@@ -125,7 +129,7 @@ export default function SettingsPage() {
                           <DialogFooter className="sm:flex-wrap">
                             <DialogClose>
                               <Button variant="outline">
-                                Fermer
+                                { m.close() }
                               </Button>
                             </DialogClose>
                             <Button onClick={() => handleConnectIdp(providerId) } className="w-full sm:w-auto">
@@ -139,7 +143,7 @@ export default function SettingsPage() {
                       </Dialog>
                     ) : (
                       <Button disabled={ !!tenantIdP || isTenantIdPLoading } className="w-full" onClick={() => handleConnectIdp(providerId) }>
-                        Connecter { identityProviders[providerId].name }
+                        { m.connect_object({ object: identityProviders[providerId].name }) }
                       </Button>
                     )
                     }
@@ -152,7 +156,7 @@ export default function SettingsPage() {
         <CardFooter className="flex justify-end bg-muted/50 justify-between">
           <DeleteTenant tenant={ tenant } />
           <Button disabled={!hasGeneralInfoChanged || !validator.isFQDN(tenantDomain)}>
-            Enregistrer les modifications
+            { m.save_changes() }
           </Button>
         </CardFooter>
       </Card>

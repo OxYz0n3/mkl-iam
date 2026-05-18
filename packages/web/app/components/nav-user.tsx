@@ -1,18 +1,14 @@
 import type { User } from "@mkl-iam/back/src/auth/model"
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 import { useNavigate } from "react-router"
 
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -30,6 +26,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { logout } from "@/lib/auth"
+import { m } from "@/paraglide/messages"
 
 
 function UserAvatar({ user }: { user: User })
@@ -94,7 +91,7 @@ export function NavUser({ user }: { user: User })
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={ () => navigate('/account') }>
                 <BadgeCheck />
-                Compte
+                { m.account() }
               </DropdownMenuItem>
               {/* <DropdownMenuItem>
                 <CreditCard />
@@ -111,7 +108,7 @@ export function NavUser({ user }: { user: User })
               navigate('/auth/login');
             } }>
               <LogOut />
-              Se déconnecter
+              { m.logout() }
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

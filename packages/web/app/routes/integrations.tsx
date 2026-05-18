@@ -1,16 +1,19 @@
 import { Badge, CheckCircle2, Plug } from "lucide-react";
 import { useOutletContext } from "react-router";
-
-import type { MainContext } from "./main";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 
 import { useIntegrations } from "@/hooks/use-integrations";
-import { app } from "@/lib/api";
+
 import { getToken } from "@/lib/auth";
-import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
+import { app } from "@/lib/api";
+
+import type { MainContext } from "./main";
+
+import { m } from "@/paraglide/messages";
 
 
 export default function Integrations()
@@ -45,7 +48,7 @@ export default function Integrations()
         <CardHeader>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Plug className="w-5 h-5 text-primary" />
-            Configuration des intégrations
+            { m.integrations_configuration() }
           </CardTitle>
           <CardDescription>
             Connectez les outils utilisés par votre entreprise. Nous créerons automatiquement les comptes de vos employés sur ces plateformes.

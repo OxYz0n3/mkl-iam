@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 
 import { useAddTenant } from "@/hooks/use-tenants";
 
+import { m } from "@/paraglide/messages";
+
 
 export default function AddTenant() {
   const { trigger: addTenant, isMutating: isAddingTenant } = useAddTenant();
@@ -40,7 +42,7 @@ export default function AddTenant() {
         <CardHeader className="space-y-2">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <HousePlus className="w-5 h-5 text-primary" />
-            Ajouter une entreprise
+            { m.tenants_create() }
           </CardTitle>
           <CardDescription>
             Créez votre espace de travail en ajoutant le nom de votre entreprise.
@@ -50,7 +52,9 @@ export default function AddTenant() {
           <form onSubmit={ handleSubmit } className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Nom de l'entreprise</Label>
+                <Label htmlFor="name">
+                  { m.tenant_name() }
+                </Label>
                 <Input
                   id="name"
                   placeholder="Ex: MoonkeyLink"
@@ -62,7 +66,9 @@ export default function AddTenant() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="domain">Nom de domaine</Label>
+                <Label htmlFor="domain">
+                  { m.tenant_name() }
+                </Label>
                 <Input
                   id="domain"
                   placeholder="Ex: moonkeylink.com"
@@ -86,7 +92,7 @@ export default function AddTenant() {
                   Ajout en cours...
                 </>
               :
-                "Ajouter l'entreprise"
+                m.tenants_create()
               }
             </Button>
           </form>

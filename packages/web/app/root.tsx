@@ -1,17 +1,23 @@
+import { SWRConfig } from "swr";
+import { toast } from "sonner";
 import {
   Links,
   Meta,
+  Navigate,
   Outlet,
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
+  useLocation,
+  useParams,
 } from "react-router"
 
 import { Toaster } from "@/components/ui/sonner";
+
 import type { Route } from "./+types/root"
 import "./app.css"
-import { SWRConfig } from "swr";
-import { toast } from "sonner";
+
+import { setLocale, locales, baseLocale } from '@/paraglide/runtime';
 
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -41,6 +47,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const { locale } = useParams();
+  const location = useLocation();
+
+  if (locale && !locales.includes(locale as any))
+    return (<Navigate to={ location.pathname.replace(`/${locale}`, `/${baseLocale}`) } replace />);
+
+  const currentLocale = locale || "en";
+
+  setLocale(currentLocale as typeof locales[number]);
+
   return (<Outlet />);
 }
 

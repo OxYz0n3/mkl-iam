@@ -1,7 +1,7 @@
 import { ChevronsUpDown, Plus, Settings, Users } from "lucide-react"
 import { useNavigate } from "react-router"
 
-import type { GetTenantsResponse, Tenant } from "@mkl-iam/back/src/tenants/model"
+import type { Tenant } from "@mkl-iam/back/src/tenants/model"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { m } from "@/paraglide/messages"
 
 
 export function TenantsSwitcher({
@@ -26,7 +27,7 @@ export function TenantsSwitcher({
   activeTenant,
   setActiveTenant,
 }: {
-  tenants: GetTenantsResponse;
+  tenants: Tenant[];
   activeTenant: Tenant | null;
   setActiveTenant: (tenant: Tenant) => void;
 }) {
@@ -48,14 +49,26 @@ export function TenantsSwitcher({
           >
             { activeTenant ?
               <Avatar className="h-8 w-8 rounded-full">
-                  <AvatarFallback>{ tenants.find(t => t.id === activeTenant.id)?.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }</AvatarFallback>
+                  <AvatarFallback>
+                    {
+                      activeTenant.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('')
+                    }
+                  </AvatarFallback>
               </Avatar> :
               <Skeleton className="h-8 w-8 rounded-full" />
             }
             { activeTenant ?
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{ tenants.find(t => t.id === activeTenant.id)?.name }</span>
-                <span className="truncate text-xs">{ tenants.find(t => t.id === activeTenant.id)?.role }</span>
+                <span className="truncate font-medium">
+                  {
+                    activeTenant.name
+                  }
+                </span>
+                <span className="truncate text-xs">
+                  {
+                    m[activeTenant.role]()
+                  }
+                </span>
               </div>
               :
               <div className="grid flex-1 text-left text-sm leading-tight gap-2">
@@ -74,7 +87,7 @@ export function TenantsSwitcher({
           >
             <DropdownMenuGroup>
                 <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Entreprises
+                { m.tenants() }
                 </DropdownMenuLabel>
             </DropdownMenuGroup>
             {tenants.map((tenant, index) => (
@@ -101,7 +114,9 @@ export function TenantsSwitcher({
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Settings className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Gérer mes entreprise</div>
+              <div className="font-medium text-muted-foreground">
+                { m.tenants_manage() }
+              </div>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate("/add-tenant")}
@@ -110,7 +125,9 @@ export function TenantsSwitcher({
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Créer une entreprise</div>
+              <div className="font-medium text-muted-foreground">
+                { m.tenants_create() }
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

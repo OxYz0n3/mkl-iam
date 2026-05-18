@@ -7,7 +7,8 @@
     "dev": "kill-port 5173 && react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "format": "prettier --write \"**/*.{ts,tsx}\""
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "machine-translate": "inlang machine translate --project project.inlang"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",
@@ -43,6 +44,8 @@
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "@inlang/paraglide-js": "^2.18.0",
+    "@inlang/cli": "^3.0.0"
   }
 }

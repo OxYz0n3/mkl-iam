@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeleteUser } from "@/components/user-delete";
 import { UpsertUser } from "@/components/user-upsert";
@@ -19,9 +20,10 @@ import {
 
 import { useUsers, useSyncUsers } from "@/hooks/use-users";
 
-import type { MainContext } from "./main";
 import type { TenantUser } from "@mkl-iam/back/src/tenants/users/model";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import type { MainContext } from "./main";
+
+import { m } from "@/paraglide/messages";
 
 
 export default function Users() {
@@ -53,7 +55,7 @@ export default function Users() {
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <UsersIcon className="w-5 h-5 text-primary" />
-            Gestion des utilisateurs
+            { m.users_management() }
           </CardTitle>
           <div className="flex gap-4">
             <Tooltip>
@@ -65,7 +67,7 @@ export default function Users() {
                       :
                       <AlertTriangle className="size-4 text-orange-400" />
                     }
-                    Synchroniser les utilisateurs
+                    { m.users_sync() }
                   </Button>
                 </span>
               }/>
@@ -77,7 +79,7 @@ export default function Users() {
             </Tooltip>
             <Button onClick={ () => setUpsertOpen(true) }>
               <Plus className="size-4" />
-              Ajouter un utilisateur
+              { m.users_add() }
             </Button>
           </div>
         </CardHeader>
@@ -86,7 +88,7 @@ export default function Users() {
             <Table className="min-w-[560px]">
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="px-3 py-2 font-medium">Nom</TableHead>
+                  <TableHead className="px-3 py-2 font-medium">{ m.name() }</TableHead>
                   <TableHead className="px-3 py-2 font-medium">Email principal</TableHead>
                   <TableHead className="px-3 py-2 font-medium">Rôle</TableHead>
                   <TableHead className="px-3 py-2 font-medium text-right">Actions</TableHead>
@@ -102,7 +104,7 @@ export default function Users() {
                 ) : users.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="px-3 py-2 text-center text-muted-foreground">
-                      Aucun utilisateur trouvé.
+                      { m.no_object_found({ object: m.user().toLocaleLowerCase() })}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -123,7 +125,7 @@ export default function Users() {
                               setUpdateUser(user);
                               setUpsertOpen(true);
                             }}>
-                              Modifier
+                              { m.edit() }
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -133,7 +135,7 @@ export default function Users() {
                                 setDeleteOpen(true);
                               }}
                             >
-                              Supprimer
+                              { m.delete() }
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

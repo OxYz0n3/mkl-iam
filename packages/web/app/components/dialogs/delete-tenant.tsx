@@ -1,15 +1,17 @@
+import { useState } from "react";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { Spinner } from "../ui/spinner";
 import { Button } from "../ui/button";
+import { Field } from "../ui/field";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 
 import { useDeleteTenant } from "@/hooks/use-tenants";
 
 import type { Tenant } from "@mkl-iam/back/src/tenants/model";
-import { Spinner } from "../ui/spinner";
-import { useState } from "react";
-import { Field } from "../ui/field";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Separator } from "../ui/separator";
+
+import { m } from '@/paraglide/messages.js'
 
 
 export default function DeleteTenant({ tenant }: { tenant: Tenant })
@@ -23,7 +25,7 @@ export default function DeleteTenant({ tenant }: { tenant: Tenant })
         <Button
           disabled={tenant.role != 'owner'}
           variant="destructive">
-          Supprimer l'entreprise
+          { m.tenant_delete() }
         </Button>
       } />
       <AlertDialogContent>

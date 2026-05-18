@@ -12,6 +12,8 @@ import type { Tenant } from "@mkl-iam/back/src/tenants/model";
 import type { User } from "@mkl-iam/back/src/auth/model";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+import { m } from "@/paraglide/messages";
+
 
 export type MainContext = {
   user: User;
@@ -24,15 +26,15 @@ const menuItems = [
     icon: LayoutDashboard,
     href: "/",
   }, {
-    name: "Utilisateurs",
+    name: m.users(),
     icon: Users,
     href: "/users",
   }, {
-    name: "Intégrations",
+    name: m.integrations(),
     icon: Plug,
     href: "/integrations",
   }, {
-    name: "Paramètres",
+    name: m.settings(),
     icon: Settings,
     href: "/settings",
   }

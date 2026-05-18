@@ -22,6 +22,7 @@ import { useAddUser } from "@/hooks/use-users";
 
 import type { TenantUser } from "@mkl-iam/back/src/tenants/users/model";
 import type { Tenant } from "@mkl-iam/back/src/tenants/model";
+import { m } from "@/paraglide/messages";
 
 
 export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?: TenantUser; openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>] })
@@ -63,7 +64,11 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
       <DialogContent className="sm:max-w-sm">
         <form onSubmit={ handleUserSubmit } className="space-y-6">
           <DialogHeader>
-            <DialogTitle>Ajouter un utilisateur</DialogTitle>
+            <DialogTitle>
+              {
+                user ? m.users_edit() : m.users_add()
+              }
+            </DialogTitle>
             <DialogDescription>
               Remplissez le formulaire ci-dessous pour ajouter un nouvel utilisateur à votre entreprise.
             </DialogDescription>
@@ -71,11 +76,15 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
           <FieldGroup>
             <div className="grid grid-cols-2 gap-4">
               <Field>
-                <Label>Prénom</Label>
+                <Label>
+                  { m.first_name() }
+                </Label>
                 <Input required placeholder="Michel" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </Field>
               <Field>
-                <Label>Nom</Label>
+                <Label>
+                  { m.last_name() }
+                </Label>
                 <Input required placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </Field>
             </div>
@@ -110,10 +119,18 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
           </FieldGroup>
           <DialogFooter>
             <DialogClose render={
-              <Button variant="outline">Fermer</Button>
+              <Button variant="outline">
+                { m.close() }
+              </Button>
             } />
             <Button type="submit" disabled={ !isValid || isAddingUser }>
-              { isAddingUser ? <><Spinner /> Ajout en cours...</> : "Ajouter" }
+              { isAddingUser ?
+                <>
+                  <Spinner />
+                  Ajout en cours...
+                </> :
+                m.add()
+              }
             </Button>
           </DialogFooter>
         </form>
