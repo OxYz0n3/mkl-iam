@@ -1,4 +1,4 @@
-import { MoreHorizontalIcon, Plus, RefreshCw } from "lucide-react";
+import { AlertTriangle, MoreHorizontalIcon, Plus, RefreshCw, Users as UsersIcon } from "lucide-react";
 import { useOutletContext } from "react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import { useUsers, useSyncUsers } from "@/hooks/use-users";
 
 import type { MainContext } from "./main";
 import type { TenantUser } from "@mkl-iam/back/src/tenants/users/model";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 export default function Users() {
@@ -50,12 +51,30 @@ export default function Users() {
     <div className="flex justify-center p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle className="text-xl font-bold">Gestion des utilisateurs</CardTitle>
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <UsersIcon className="w-5 h-5 text-primary" />
+            Gestion des utilisateurs
+          </CardTitle>
           <div className="flex gap-4">
-            <Button variant="outline" onClick={ () => handleSyncUsers() } disabled={ isSyncingUsers }>
-              <RefreshCw className="size-4" />
-              Synchroniser les utilisateurs
-            </Button>
+            <Tooltip>
+              <TooltipTrigger render={
+                <span>
+                  <Button variant="outline" onClick={ () => handleSyncUsers() } disabled={ isSyncingUsers || !tenant.isIdPSynced }>
+                    { tenant.isIdPSynced ?
+                      <RefreshCw className="size-4" />
+                      :
+                      <AlertTriangle className="size-4 text-orange-400" />
+                    }
+                    Synchroniser les utilisateurs
+                  </Button>
+                </span>
+              }/>
+              { !tenant.isIdPSynced &&
+                <TooltipContent>
+                  Vous devez d'abord configurer un fournisseur d'identité (IdP).
+                </TooltipContent>
+              }
+            </Tooltip>
             <Button onClick={ () => setUpsertOpen(true) }>
               <Plus className="size-4" />
               Ajouter un utilisateur

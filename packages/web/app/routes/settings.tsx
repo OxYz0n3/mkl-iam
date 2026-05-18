@@ -89,7 +89,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Single Sign-On (SSO)</h3>
+            <h3 className="text-lg font-medium border-b pb-2">Fournisseurs d'identité (IdP)</h3>
             <p className="text-sm text-muted-foreground">
               Liez un annuaire externe pour permettre à vos employés de se connecter en un clic et d'importer leurs comptes.
             </p>
@@ -148,7 +148,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end bg-muted/50">
+        <CardFooter className="flex justify-end bg-muted/50 justify-between">
+          <Button variant="destructive">
+            Supprimer l'entreprise
+          </Button>
           <Button disabled={!hasGeneralInfoChanged || !validator.isFQDN(tenantDomain)}>
             Enregistrer les modifications
           </Button>

@@ -48,14 +48,14 @@ export function TenantsSwitcher({
           >
             { activeTenant ?
               <Avatar className="h-8 w-8 rounded-full">
-                  <AvatarFallback>{ tenants.find(t => t.tenant.id === activeTenant.id)?.tenant.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }</AvatarFallback>
+                  <AvatarFallback>{ tenants.find(t => t.id === activeTenant.id)?.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }</AvatarFallback>
               </Avatar> :
               <Skeleton className="h-8 w-8 rounded-full" />
             }
             { activeTenant ?
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{ tenants.find(t => t.tenant.id === activeTenant.id)?.tenant.name }</span>
-                <span className="truncate text-xs">{ tenants.find(t => t.tenant.id === activeTenant.id)?.role }</span>
+                <span className="truncate font-medium">{ tenants.find(t => t.id === activeTenant.id)?.name }</span>
+                <span className="truncate text-xs">{ tenants.find(t => t.id === activeTenant.id)?.role }</span>
               </div>
               :
               <div className="grid flex-1 text-left text-sm leading-tight gap-2">
@@ -79,14 +79,14 @@ export function TenantsSwitcher({
             </DropdownMenuGroup>
             {tenants.map((tenant, index) => (
               <DropdownMenuItem
-                key={tenant.tenant.name}
-                onClick={() => setActiveTenant(tenant.tenant)}
+                key={tenant.name}
+                onClick={() => setActiveTenant(tenant)}
                 className="gap-2 p-2"
               >
                 <Avatar className="h-6 w-6 rounded-lg">
-                    <AvatarFallback>{ tenant.tenant.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }</AvatarFallback>
+                    <AvatarFallback>{ tenant.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }</AvatarFallback>
                 </Avatar>
-                { tenant.tenant.name }
+                { tenant.name }
                 <div className="p-1 ml-auto flex items-center rounded-md border bg-transparent px-1 text-md text-muted-foreground font-semibold">
                   { tenant.userCount }
                   <Users className="ms-1 size-4" />

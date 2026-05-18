@@ -16,12 +16,16 @@ export function useTenants()
             throw error;
 
         return (data);
-    }, { fallbackData: [] }));
+    }, {
+        fallbackData: [],
+    }));
 }
 
 export function useAddTenant()
 {
-    return (useSWRMutation('/api/tenants', async (_, { arg }: { arg: Parameters<typeof app.tenants.post>[0] }) => {
+    const { mutate } = useTenants();
+
+    const mutation = useSWRMutation('/api/tenants', async (_, { arg }: { arg: Parameters<typeof app.tenants.post>[0] }) => {
         const { data, error } = await app.tenants.post(arg, {
             headers: { Authorization: `Bearer ${ getToken() }` }
         });
@@ -30,5 +34,18 @@ export function useAddTenant()
             throw new Error(error.value.message);
 
         return (data);
-    }));
+    });
+
+    const triggerAndForceRefresh = async (arg: Parameters<typeof app.tenants.post>[0]) => {
+        const result = await mutation.trigger(arg);
+
+        await mutate(undefined, { revalidate: true });
+
+        return (result);
+    }
+
+    return ({
+        ...mutation,
+        trigger: triggerAndForceRefresh
+    })
 }

@@ -15,6 +15,7 @@ import { useAddTenant } from "@/hooks/use-tenants";
 
 export default function AddTenant() {
   const { trigger: addTenant, isMutating: isAddingTenant } = useAddTenant();
+
   const [name, setName] = useState('');
   const [domain, setDomain] = useState('');
 

@@ -6,7 +6,6 @@ import { table } from "../db/schema";
 
 const _createUser = createInsertSchema(table.users, {
     email: t.String({ format: "email" }),
-    password: t.String({ format: ''}),
 });
 const _selectUser = createSelectSchema(table.users);
 

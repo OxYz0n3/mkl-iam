@@ -14,16 +14,20 @@ const _selectUserToTenant = createSelectSchema(table.usersToTenants);
 export const tCreateTenant = t.Omit(_createTenant, [ 'id', 'users', 'createdAt', 'updatedAt' ]);
 export type CreateTenant   = Static<typeof tCreateTenant>;
 
-export const tTenant = _selectTenant;
-export type   Tenant = Static<typeof tTenant>;
-
 export const tUserToTenant = _selectUserToTenant;
 export type   UserToTenant = Static<typeof tUserToTenant>;
 
-export const tGetTenantsResponse = t.Array(t.Object({
-    tenant: tTenant,
-    role: tUserToTenant.properties.role,
-    joinedAt: tUserToTenant.properties.joinedAt,
-    userCount: t.Number()
-}));
+export const tTenant = t.Composite([
+    _selectTenant,
+    t.Object({
+        isIdPSynced: t.Boolean(),
+        role: tUserToTenant.properties.role,
+        joinedAt: tUserToTenant.properties.joinedAt,
+        userCount: t.Number(),
+    }),
+]);
+
+export type Tenant = Static<typeof tTenant>;
+
+export const tGetTenantsResponse = t.Array(tTenant);
 export type GetTenantsResponse = Static<typeof tGetTenantsResponse>;
