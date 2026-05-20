@@ -29,10 +29,10 @@ export default function AddTenant() {
     try {
       await addTenant({ name, domain: domain.trim().toLowerCase() });
 
-      toast.success("L'entreprise a été ajoutée avec succès !");
+      toast.success(m.tenant_add_success());
       navigate("/");
     } catch (error) {
-      toast.error("Une erreur est survenue lors de l'ajout de l'entreprise");
+      toast.error(m.tenant_add_error());
     }
   };
 
@@ -57,7 +57,7 @@ export default function AddTenant() {
                 </Label>
                 <Input
                   id="name"
-                  placeholder="Ex: MoonkeyLink"
+                  placeholder={m.tenant_name_placeholder()}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -71,7 +71,7 @@ export default function AddTenant() {
                 </Label>
                 <Input
                   id="domain"
-                  placeholder="Ex: moonkeylink.com"
+                  placeholder={m.domain_name_placeholder()}
                   value={domain}
                   aria-invalid={ !!domain && !validator.isFQDN(domain) }
                   onChange={(e) => setDomain(e.target.value)}
@@ -89,7 +89,7 @@ export default function AddTenant() {
               { isAddingTenant ?
                 <>
                   <Spinner />
-                  Ajout en cours...
+                  {m.adding_tenant()}
                 </>
               :
                 m.tenants_create()

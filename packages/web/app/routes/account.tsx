@@ -40,7 +40,7 @@ export default function AccountPage() {
 
     await updateProfile({ firstName, lastName, email });
       // setUser(response.data);
-      toast.success("Profil mis à jour avec succès.");
+      toast.success(m.profile_update_success());
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,18 +61,18 @@ export default function AccountPage() {
 
       if (response.error) {
         if (response.error?.status === 400) {
-          toast.error("Le mot de passe actuel est incorrect.");
+          toast.error(m.current_password_error());
         } else {
-          toast.error("Erreur lors du changement de mot de passe.");
+          toast.error(m.password_change_error());
         }
       } else {
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
-        toast.success("Mot de passe changé avec succès.");
+        toast.success(m.password_change_success());
       }
     } catch (error) {
-      toast.error("Erreur lors du changement de mot de passe.");
+      toast.error(m.password_change_error());
     } finally {
       setIsLoadingPassword(false);
     }
@@ -94,7 +94,7 @@ export default function AccountPage() {
             { m.account_settings() }
           </CardTitle>
           <CardDescription>
-            Mettez a jour vos informations personnelles et votre mot de passe.
+            { m.account_settings_description() }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -107,7 +107,7 @@ export default function AccountPage() {
                 <Input
                   id="firstName"
                   type="text"
-                  placeholder="Jean"
+                  placeholder={m.first_name_placeholder()}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   disabled={isUpdatingProfile}
@@ -121,7 +121,7 @@ export default function AccountPage() {
                 <Input
                   id="lastName"
                   type="text"
-                  placeholder="Dupont"
+                  placeholder={m.last_name_placeholder()}
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   disabled={isUpdatingProfile}
@@ -152,10 +152,10 @@ export default function AccountPage() {
               {isUpdatingProfile ? (
                 <>
                   <Spinner />
-                  Mise a jour en cours...
+                  { m.updating_profile() }
                 </>
               ) : (
-                'Mettre a jour le profil'
+                m.update_profile()
               )}
             </Button>
           </form>
@@ -165,9 +165,9 @@ export default function AccountPage() {
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                <Label htmlFor="currentPassword">{ m.current_password() }</Label>
                 <NavLink to="/auth/forgot-password" className="text-sm text-muted-foreground hover:underline" tabIndex={3}>
-                    Mot de passe oublié ?
+                    { m.forgot_password() }
                 </NavLink>
               </div>
               <Input
@@ -182,7 +182,7 @@ export default function AccountPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+              <Label htmlFor="newPassword">{ m.new_password() }</Label>
               <Input
                 id="newPassword"
                 type="password"
@@ -194,10 +194,10 @@ export default function AccountPage() {
                 autoComplete="new-password"
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground">Minimum 8 caracteres</p>
+              <p className="text-xs text-muted-foreground">{ m.min_8_chars() }</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+              <Label htmlFor="confirmPassword">{ m.confirm_new_password() }</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -214,7 +214,7 @@ export default function AccountPage() {
                 }
               />
               {confirmPassword && newPassword && newPassword !== confirmPassword && (
-                <p className="text-xs text-destructive">Les mots de passe ne correspondent pas</p>
+                <p className="text-xs text-destructive">{ m.passwords_dont_match() }</p>
               )}
             </div>
             <Button
@@ -225,10 +225,10 @@ export default function AccountPage() {
               {isLoadingPassword ? (
                 <>
                   <Spinner />
-                  Changement en cours...
+                  { m.changing_password() }
                 </>
               ) : (
-                'Changer le mot de passe'
+                m.change_password()
               )}
             </Button>
           </form>

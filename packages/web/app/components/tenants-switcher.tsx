@@ -89,9 +89,9 @@ export function TenantsSwitcher({
             sideOffset={4}
           >
             <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
                 { m.tenants() }
-                </DropdownMenuLabel>
+              </DropdownMenuLabel>
             </DropdownMenuGroup>
             {tenants.map((tenant, index) => (
               <DropdownMenuItem
@@ -100,7 +100,9 @@ export function TenantsSwitcher({
                 className="gap-2 p-2"
               >
                 <Avatar className="h-6 w-6 rounded-lg">
-                    <AvatarFallback>{ tenant.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }</AvatarFallback>
+                  <AvatarFallback>
+                    { tenant.name[0].toLocaleUpperCase().split(' ').map(t => t[0]).join('') }
+                  </AvatarFallback>
                 </Avatar>
                 { tenant.name }
                 <div className="p-1 ml-auto flex items-center rounded-md border bg-transparent px-1 text-md text-muted-foreground font-semibold">
@@ -111,7 +113,7 @@ export function TenantsSwitcher({
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate('/manage-tenants') }
+              onClick={() => navigate(localizeHref('/manage-tenants')) }
               className="gap-2 p-2"
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
@@ -122,7 +124,7 @@ export function TenantsSwitcher({
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => navigate(localizeHref("/add-tenant"))}
+              onClick={() => navigate(localizeHref("/add-tenant")) }
               className="gap-2 p-2"
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">

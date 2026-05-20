@@ -5,6 +5,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { requireAuth } from "@/lib/auth";
 
 
+import { m } from "@/paraglide/messages";
+
+
 export async function clientLoader() {
   const { user } = await requireAuth();
 
@@ -15,7 +18,7 @@ export function HydrateFallback() {
   return (
     <div className="flex h-screen items-center justify-center gap-2 text-md text-muted-foreground">
       <Spinner />
-      Chargement en cours...
+      { m.loading() }
     </div>
   );
 }

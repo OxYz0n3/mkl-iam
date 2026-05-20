@@ -37,7 +37,7 @@ export default function Integrations()
     });
 
     if (error)
-      toast.error("Failed to get authentication URL. Please try again.");
+      toast.error(m.error_auth_url());
     else
       window.location.href = data;
   }
@@ -51,14 +51,14 @@ export default function Integrations()
             { m.integrations_configuration() }
           </CardTitle>
           <CardDescription>
-            Connectez les outils utilisés par votre entreprise. Nous créerons automatiquement les comptes de vos employés sur ces plateformes.
+            { m.integrations_description() }
           </CardDescription>
         </CardHeader>
         <CardContent>
           { isLoading && (
           <div className="flex mt-10 mb-10 items-center justify-center gap-2 text-md text-muted-foreground">
             <Spinner />
-            Chargement des intégrations en cours...
+            { m.loading_integrations() }
           </div>
           )
           }
@@ -76,7 +76,7 @@ export default function Integrations()
                     {isAppConnected(appId) && (
                       <Badge className="flex items-center gap-1 text-green-800">
                         <CheckCircle2 className="w-3 h-3" />
-                        Connecté
+                        { m.connected() }
                       </Badge>
                     )}
                   </div>
@@ -91,7 +91,7 @@ export default function Integrations()
                           className="w-full"
                           // onClick={() => handleManage(app.id)}
                         >
-                          Gérer l'intégration
+                          { m.manage_integration() }
                         </Button>
                       </div>
                     ) : (
@@ -99,7 +99,7 @@ export default function Integrations()
                         className="w-full"
                         onClick={() => handleConnectIntegration(appId) }
                       >
-                        Connecter {app.name}
+                        { m.connect_object({ object: app.name }) }
                       </Button>
                     )}
                   </div>

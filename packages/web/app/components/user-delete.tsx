@@ -14,6 +14,7 @@ import {
 
 import { useDeleteUser } from "@/hooks/use-users";
 import { toast } from "sonner";
+import { m } from "@/paraglide/messages";
 
 
 export function DeleteUser({
@@ -28,23 +29,23 @@ export function DeleteUser({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Supprimer un utilisateur</DialogTitle>
+          <DialogTitle>{ m.user_delete_title() }</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.
+            { m.user_delete_confirmation() }
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose render={
-            <Button variant="outline">Fermer</Button>
+            <Button variant="outline">{ m.close() }</Button>
           } />
           <Button
             disabled={ isDeletingUser }
             onClick={ async () => {
               await deleteUser(userId);
-              toast.success("Utilisateur supprimé avec succès !");
+              toast.success(m.user_delete_success());
               setOpen(false);
             } }>
-            { isDeletingUser ? <><Spinner /> Suppression en cours...</> : "Supprimer" }
+            { isDeletingUser ? <><Spinner /> { m.deleting() }</> : m.delete() }
           </Button>
         </DialogFooter>
       </DialogContent>

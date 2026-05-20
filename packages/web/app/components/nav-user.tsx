@@ -1,4 +1,3 @@
-import type { User } from "@mkl-iam/back/src/auth/model"
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -6,6 +5,7 @@ import {
 } from "lucide-react"
 import { useNavigate } from "react-router"
 
+import { LanguageSwitcherSub } from "@/components/language-switcher"
 import {
   Avatar,
   AvatarFallback,
@@ -25,8 +25,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { logout } from "@/lib/auth"
+
 import { m } from "@/paraglide/messages"
+import { logout } from "@/lib/auth"
+
+import type { User } from "@mkl-iam/back/src/auth/model"
 
 
 function UserAvatar({ user }: { user: User })
@@ -81,35 +84,22 @@ export function NavUser({ user }: { user: User })
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            {/* <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={ () => navigate('/account') }>
                 <BadgeCheck />
                 { m.account() }
               </DropdownMenuItem>
-              {/* <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuSeparator />
+              <LanguageSwitcherSub />
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={ () => {
+                logout();
+                navigate('/auth/login');
+              } }>
+                <LogOut />
+                { m.logout() }
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={ () => {
-              logout();
-              navigate('/auth/login');
-            } }>
-              <LogOut />
-              { m.logout() }
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-
+import * as m from '@/paraglide/messages';
 import { app } from '@/lib/api';
 
 
@@ -30,13 +30,13 @@ export default function RegisterPage() {
       const registerResponse = await app.auth.register.post({ firstName, lastName, email, password }, { fetch: { credentials: 'include' } });
 
       if (registerResponse.error) {
-        toast.error("Une erreur est survenue lors de l'inscription.");
+        toast.error(m.register_error_generic());
       } else {
-        toast.success("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+        toast.success(m.register_success());
         navigate('/auth/login');
       }
     } catch (error) {
-      toast.error("Une erreur est survenue lors de l'inscription.");
+      toast.error(m.register_error_generic());
     } finally {
       setIsLoading(false);
     }
@@ -46,19 +46,19 @@ export default function RegisterPage() {
     <div className="flex h-screen w-screen items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
+          <CardTitle className="text-2xl font-bold">{m.register_title()}</CardTitle>
           <CardDescription>
-            Remplissez les informations ci-dessous pour vous inscrire.
+            {m.register_description()}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstname">Prénom</Label>
+                <Label htmlFor="firstname">{m.first_name()}</Label>
                 <Input
                   id="firstname"
-                  placeholder="Jean"
+                  placeholder={m.first_name_placeholder()}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
@@ -67,10 +67,10 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastname">Nom</Label>
+                <Label htmlFor="lastname">{m.last_name()}</Label>
                 <Input
                   id="lastname"
-                  placeholder="Dupont"
+                  placeholder={m.last_name_placeholder()}
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   required
@@ -79,11 +79,11 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Adresse e-mail</Label>
+              <Label htmlFor="email">{m.email_address()}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="nom@exemple.com"
+                placeholder={m.email_placeholder()}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -93,7 +93,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">{m.password()}</Label>
               <Input
                 id="password"
                 type="password"
@@ -105,7 +105,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password_confirmation">Confirmer le mot de passe</Label>
+              <Label htmlFor="password_confirmation">{m.confirm_password()}</Label>
               <Input
                 id="password_confirmation"
                 type="password"
@@ -125,10 +125,10 @@ export default function RegisterPage() {
               { isLoading ?
                 <>
                   <Spinner />
-                  Inscription en cours...
+                  {m.registering()}
                 </>
               :
-                "S'inscrire"
+                m.register()
               }
             </Button>
           </form>
@@ -136,10 +136,10 @@ export default function RegisterPage() {
 
         <CardFooter className="flex flex-wrap items-center justify-center gap-2">
           <div className="text-sm text-muted-foreground">
-            Vous avez déjà un compte ?
+            {m.already_have_account()}
           </div>
           <NavLink to="/auth/login" className="text-sm hover:underline">
-            Se connecter
+            {m.login()}
           </NavLink>
         </CardFooter>
       </Card>

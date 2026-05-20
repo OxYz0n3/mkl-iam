@@ -55,7 +55,7 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
       secondaryEmail: (secondaryEmail.trim() !== "" ? secondaryEmail : undefined),
     });
 
-    toast.success("Utilisateur ajouté avec succès !");
+    toast.success(m.user_add_success());
     setOpen(false);
   };
 
@@ -70,7 +70,7 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
               }
             </DialogTitle>
             <DialogDescription>
-              Remplissez le formulaire ci-dessous pour ajouter un nouvel utilisateur à votre entreprise.
+              { m.user_upsert_description() }
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
@@ -79,17 +79,17 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
                 <Label>
                   { m.first_name() }
                 </Label>
-                <Input required placeholder="Michel" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <Input required placeholder={m.first_name_placeholder()} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </Field>
               <Field>
                 <Label>
                   { m.last_name() }
                 </Label>
-                <Input required placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <Input required placeholder={m.last_name_placeholder()} value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </Field>
             </div>
             <Field>
-              <Label>Email principale de l'utilisateur</Label>
+              <Label>{ m.user_primary_email() }</Label>
               <InputGroup>
                 <InputGroupInput
                   required
@@ -103,18 +103,18 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
               </InputGroup>
             </Field>
             <Field>
-              <Label>Email secondaire de l'utilisateur</Label>
+              <Label>{ m.user_secondary_email() }</Label>
               <Input
                 type="email"
                 value={secondaryEmail}
                 aria-invalid={ secondaryEmail && !validator.isEmail(secondaryEmail) ? "true" : "false" }
                 placeholder="michel.dupont@example.com"
                 onChange={(e) => setSecondaryEmail(e.target.value)} />
-              <FieldDescription>Les instructions de connexion sont envoyées à l'adresse e-mail secondaire.</FieldDescription>
+              <FieldDescription>{ m.user_secondary_email_description() }</FieldDescription>
             </Field>
             <Field>
-              <Label>Rôle</Label>
-              <Input disabled placeholder="Cette fonctionnalité est en cours de développement" />
+              <Label>{ m.role() }</Label>
+              <Input disabled placeholder={ m.feature_under_development() } />
             </Field>
           </FieldGroup>
           <DialogFooter>
@@ -127,7 +127,7 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
               { isAddingUser ?
                 <>
                   <Spinner />
-                  Ajout en cours...
+                  { m.adding_tenant() }
                 </> :
                 m.add()
               }

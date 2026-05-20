@@ -31,21 +31,21 @@ export default function DeleteTenant({ tenant }: { tenant: Tenant })
       <AlertDialogContent>
         <AlertDialogHeader className="gap-4">
           <AlertDialogTitle>
-            Êtes-vous sûr de vouloir supprimer l'entreprise?
+            { m.tenant_delete_confirmation_title() }
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action est irréversible!
+            { m.tenant_delete_confirmation_irreversible() }
             <br />
-            Pour confirmer, écrivez "<b>{ tenant.name }</b>" dans le champ ci-dessous.
+            { m.tenant_delete_confirmation_instruction({ name: tenant.name }) }
           </AlertDialogDescription>
           <Field>
-            <Label>Nom de l'entreprise</Label>
+            <Label>{ m.tenant_name() }</Label>
             <Input required placeholder={ tenant.name } value={ tenantName } onChange={(e) => setTenantName(e.target.value)} />
           </Field>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>
-            Annuler
+            { m.cancel() }
           </AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
@@ -55,7 +55,7 @@ export default function DeleteTenant({ tenant }: { tenant: Tenant })
             { isMutating &&
               <Spinner/>
             }
-            Supprimer l'entreprise
+            { m.tenant_delete_action() }
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

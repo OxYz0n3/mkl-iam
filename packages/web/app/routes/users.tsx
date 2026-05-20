@@ -44,9 +44,9 @@ export default function Users() {
     const addedUsers = await syncUsers();
 
     if (addedUsers.length > 0)
-      toast.success(`${ addedUsers.length } utilisateur(s) synchronisé(s) avec succès !`);
+      toast.success(m.users_sync_success({ count: addedUsers.length }));
     else
-      toast.info("Pas d'utilisateurs à synchroniser.");
+      toast.info(m.users_no_sync());
   };
 
   return (
@@ -73,7 +73,7 @@ export default function Users() {
               }/>
               { !tenant.isIdPSynced &&
                 <TooltipContent>
-                  Vous devez d'abord configurer un fournisseur d'identité (IdP).
+                  { m.idp_required_sync() }
                 </TooltipContent>
               }
             </Tooltip>
@@ -89,16 +89,16 @@ export default function Users() {
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableHead className="px-3 py-2 font-medium">{ m.name() }</TableHead>
-                  <TableHead className="px-3 py-2 font-medium">Email principal</TableHead>
-                  <TableHead className="px-3 py-2 font-medium">Rôle</TableHead>
-                  <TableHead className="px-3 py-2 font-medium text-right">Actions</TableHead>
+                  <TableHead className="px-3 py-2 font-medium">{ m.primary_email() }</TableHead>
+                  <TableHead className="px-3 py-2 font-medium">{ m.role() }</TableHead>
+                  <TableHead className="px-3 py-2 font-medium text-right">{ m.actions() }</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={4} className="px-3 py-2 text-center text-muted-foreground">
-                      Chargement des utilisateurs...
+                      { m.loading_users() }
                     </TableCell>
                   </TableRow>
                 ) : users.length === 0 ? (

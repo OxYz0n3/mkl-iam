@@ -53,7 +53,7 @@ export default function SettingsPage() {
     });
 
     if (error)
-      toast.error("Failed to get authentication URL. Please try again.");
+      toast.error(m.error_auth_url());
     else
       window.location.href = data;
   };
@@ -67,12 +67,12 @@ export default function SettingsPage() {
             { m.tenant_settings() }
           </CardTitle>
           <CardDescription>
-            Gérez les informations de votre espace de travail et vos connexions de sécurité.
+            { m.tenant_settings_description() }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Informations générales</h3>
+            <h3 className="text-lg font-medium border-b pb-2">{ m.general_information() }</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field>
                 <Label>
@@ -100,7 +100,7 @@ export default function SettingsPage() {
               { m.idp() }
             </h3>
             <p className="text-sm text-muted-foreground">
-              Liez un annuaire externe pour permettre à vos employés de se connecter en un clic et d'importer leurs comptes.
+              { m.idp_description() }
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -121,26 +121,28 @@ export default function SettingsPage() {
                     <Separator className="my-4" />
                     { tenantIdP?.provider === providerId ? (
                       <Dialog>
-                        <DialogTrigger>
+                        <DialogTrigger render={
                           <Button variant="outline" className="w-full">
                             { m.manage_object({ object: identityProviders[providerId].name })}
                           </Button>
+                        }>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-xl">
                           <DialogHeader>
-                            <DialogTitle>Gérer la connexion { identityProviders[providerId].name }</DialogTitle>
+                            <DialogTitle>{ m.manage_connection({ object: identityProviders[providerId].name }) }</DialogTitle>
                           </DialogHeader>
                           <DialogFooter className="sm:flex-wrap">
-                            <DialogClose>
+                            <DialogClose render={
                               <Button variant="outline">
                                 { m.close() }
                               </Button>
+                            }>
                             </DialogClose>
                             <Button onClick={() => handleConnectIdp(providerId) } className="w-full sm:w-auto">
-                              Reconnecter { identityProviders[providerId].name }
+                              { m.reconnect_object({ object: identityProviders[providerId].name }) }
                             </Button>
                             <Button variant="destructive" onClick={() => deleteIdentity() } className="w-full whitespace-normal text-center leading-tight sm:w-auto">
-                              Supprimer la connexion { identityProviders[providerId].name }
+                              { m.delete_connection({ object: identityProviders[providerId].name }) }
                             </Button>
                           </DialogFooter>
                         </DialogContent>

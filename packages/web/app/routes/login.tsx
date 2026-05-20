@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+import * as m from '@/paraglide/messages';
 import { setToken, setUser } from '@/lib/auth';
 import { app } from '@/lib/api';
 
@@ -31,16 +32,16 @@ export default function LoginPage()
 
       if (loginResponse.error) {
         if (loginResponse.error.status === 400)
-          toast.warning('Mot de passe ou adresse e-mail incorrecte.');      
+          toast.warning(m.login_error_invalid_credentials());      
         else
-          toast.error('Une erreur est survenue lors de la connexion.');      
+          toast.error(m.login_error_generic());      
       } else {
         setToken(loginResponse.data.accessToken);
         setUser(loginResponse.data.user);
         navigate('/', { replace: true });
       }
     } catch (error) {
-      toast.error('Une erreur est survenue lors de la connexion.');
+      toast.error(m.login_error_generic());
     } finally {
       setIsLoading(false);
     }
@@ -50,19 +51,19 @@ export default function LoginPage()
     <div className="flex h-screen w-screen items-center justify-center">
       <Card className="min-w-md">
         <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardTitle className="text-2xl font-bold">{m.connection()}</CardTitle>
           <CardDescription>
-            Entrez votre e-mail et votre mot de passe pour vous connecter.
+            {m.login_description()}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Adresse e-mail</Label>
+              <Label htmlFor="email">{m.email_address()}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="nom@exemple.com"
+                placeholder={m.email_placeholder()}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -75,9 +76,9 @@ export default function LoginPage()
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password">{m.password()}</Label>
                 <NavLink to="/auth/forgot-password" className="text-sm text-muted-foreground hover:underline" tabIndex={3}>
-                  Mot de passe oublié ?
+                  {m.forgot_password()}
                 </NavLink>
               </div>
               <Input
@@ -99,20 +100,20 @@ export default function LoginPage()
                 { isLoading ?
                   <>
                     <Spinner />
-                    Connexion en cours...
+                    {m.logging_in()}
                   </>
                 :
-                  "Se connecter"
+                  m.login()
                 }
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-wrap items-center justify-center gap-2">
           <div className="text-sm text-muted-foreground">
-            Vous n'avez pas de compte ?
+            {m.no_account()}
           </div>
           <NavLink to="/auth/register" className="text-sm hover:underline" tabIndex={4}>
-            S'inscrire
+            {m.register()}
           </NavLink>
         </CardFooter>
       </Card>

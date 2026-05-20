@@ -1,7 +1,7 @@
 import type { LucideProps } from "lucide-react";
 import { useNavigate } from "react-router";
 
-import type { GetTenantsResponse, Tenant } from "@mkl-iam/back/src/tenants/model";
+import type { Tenant } from "@mkl-iam/back/src/tenants/model";
 import type { User } from "@mkl-iam/back/src/auth/model"
 
 import { TenantsSwitcher } from "@/components/tenants-switcher"
@@ -16,11 +16,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { localizeHref } from "@/paraglide/runtime";
  
 
 export function AppSidebar({ user, tenants, menuItems, activeTenant, setActiveTenant }: {
   user: User;
-  tenants: GetTenantsResponse;
+  tenants: Tenant[];
   menuItems: {
     name: string;
     icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
@@ -42,8 +43,8 @@ export function AppSidebar({ user, tenants, menuItems, activeTenant, setActiveTe
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton
-                  onClick={() => navigate(item.href)}
-                  isActive={ document.location.pathname === item.href }
+                  onClick={() => navigate(localizeHref(item.href)) }
+                  isActive={ document.location.pathname.endsWith(item.href) }
                 >
                   <item.icon />
                   {item.name}
