@@ -75,14 +75,18 @@ export default function SettingsPage() {
             <h3 className="text-lg font-medium border-b pb-2">Informations générales</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field>
-                <Label>Nom de l'entreprise</Label>
+                <Label>
+                  { m.tenant_name() }
+                </Label>
                 <Input 
                   value={tenantName}
                   onChange={(e) => setTenantName(e.target.value)}
                 />
               </Field>
               <Field>
-                <Label>Nom de domaine</Label>
+                <Label>
+                  { m.domain_name() }
+                </Label>
                 <Input 
                   value={tenantDomain}
                   aria-invalid={ !!tenantDomain && !validator.isFQDN(tenantDomain) }

@@ -4,21 +4,23 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { Separator } from '@/components/ui/separator';
 
-import { app } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { app } from '@/lib/api';
 
-import type { User } from '@mkl-iam/back/src/auth/model';
 import { useUpdateProfile } from '@/hooks/use-account';
+
+import { m } from '@/paraglide/messages';
+import type { MainContext } from './main';
 
 
 export default function AccountPage() {
-  const { user } = useOutletContext<{ user: User }>();
+  const { user } = useOutletContext<MainContext>();
   const { trigger: updateProfile, isMutating: isUpdatingProfile } = useUpdateProfile();
 
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
@@ -88,7 +90,9 @@ export default function AccountPage() {
     <div className="flex h-screen w-screen items-center justify-center p-4">
       <Card className="w-full max-w-xl">
         <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-bold">Parametres du compte</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            { m.account_settings() }
+          </CardTitle>
           <CardDescription>
             Mettez a jour vos informations personnelles et votre mot de passe.
           </CardDescription>
@@ -97,7 +101,9 @@ export default function AccountPage() {
           <form onSubmit={handleProfileSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Prenom</Label>
+                <Label htmlFor="firstName">
+                  { m.first_name() }
+                </Label>
                 <Input
                   id="firstName"
                   type="text"
@@ -109,7 +115,9 @@ export default function AccountPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Nom</Label>
+                <Label htmlFor="lastName">
+                  { m.last_name() }
+                </Label>
                 <Input
                   id="lastName"
                   type="text"
@@ -122,7 +130,9 @@ export default function AccountPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Adresse e-mail</Label>
+              <Label htmlFor="email">
+                { m.email_address() }
+              </Label>
               <Input
                 id="email"
                 type="email"

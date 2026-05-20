@@ -1,7 +1,6 @@
 import { ChevronsUpDown, Plus, Settings, Users } from "lucide-react"
 import { useNavigate } from "react-router"
 
-import type { Tenant } from "@mkl-iam/back/src/tenants/model"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -19,7 +18,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+
+import { localizeHref } from "@/paraglide/runtime"
 import { m } from "@/paraglide/messages"
+
+import type { Tenant } from "@mkl-iam/back/src/tenants/model"
 
 
 export function TenantsSwitcher({
@@ -119,7 +122,7 @@ export function TenantsSwitcher({
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => navigate("/add-tenant")}
+              onClick={() => navigate(localizeHref("/add-tenant"))}
               className="gap-2 p-2"
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">

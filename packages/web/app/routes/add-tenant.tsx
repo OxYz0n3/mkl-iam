@@ -45,7 +45,7 @@ export default function AddTenant() {
             { m.tenants_create() }
           </CardTitle>
           <CardDescription>
-            Créez votre espace de travail en ajoutant le nom de votre entreprise.
+            { m.add_tenant_description() }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -67,7 +67,7 @@ export default function AddTenant() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="domain">
-                  { m.tenant_name() }
+                  { m.domain_name() }
                 </Label>
                 <Input
                   id="domain"
