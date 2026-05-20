@@ -3,9 +3,11 @@ import { Elysia, t } from 'elysia';
 import { integrationModels, tAvailableIntegrations } from './model';
 import { IntegrationService } from './service';
 import { gitlabCloud } from './gitlab-cloud';
+import { github } from './github';
 
 
 export const integrations = new Elysia({ prefix: '/integrations', tags: [ 'Tenants / Integrations' ] })
+    .use(github)
     .use(gitlabCloud)
     .use(integrationModels)
     .get('/', ({ params: { tenantId } }) => IntegrationService.getIntegrations(tenantId), {

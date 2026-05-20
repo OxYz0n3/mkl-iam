@@ -23,10 +23,10 @@ export default function Integrations()
   const { data: { addedIntegrations, availableIntegrations }, isLoading } = useIntegrations(tenant.id);
 
   const isAppConnected = (appId: string) => !!addedIntegrations.find(integration => integration.app === appId);
-  const handleConnectIntegration = async (appId: 'gitlab-cloud') => {
+  const handleConnectIntegration = async (appId: 'gitlab-cloud' | 'github') => {
     const currentPath = window.location.pathname;
 
-    const { data, error } = await app.integrations[appId]['login-url'].get({
+    const { data, error } = await app.tenants({ tenantId: tenant.id }).integrations[appId]['login-url'].get({
       headers: {
         Authorization: `Bearer ${ getToken() }`,
       },
