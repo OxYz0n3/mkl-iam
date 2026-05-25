@@ -35,4 +35,21 @@ export const github = new Elysia({ prefix: '/github' })
                 description: "The URL to redirect the user to for GitHub authentication",
             }),
         }
+    })
+    .get('/organizations/:org/members', async ({ params: { tenantId, org } }) =>
+    {
+        return (GitHubService.getOrganizationMembers(tenantId, org));
+    }, {
+        beforeHandle: TenantService.tenantBelongsToUser,
+        params: t.Object({
+            tenantId: t.String(),
+            org: t.String({ description: "GitHub organization name" }),
+        }),
+        response: {
+            200: t.Array(t.Object({
+                name: t.String({ description: "User's display name or login" }),
+                email: t.Union([ t.String(), t.Null() ], { description: "User's public email (may be null)" }),
+                status: t.String({ description: "Membership status: active or pending" }),
+            }), { description: "List of organization members" }),
+        },
     });
