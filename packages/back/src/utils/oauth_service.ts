@@ -12,6 +12,7 @@ export abstract class OAuthService
     protected static SCOPE: string;
     protected static TOKEN_URL: string;
     protected static CLIENT_SECRET: string;
+    protected static SCOPE_CHECK: boolean = true;
 
     static getAuthUrl(state: string): string
     {
@@ -32,7 +33,10 @@ export abstract class OAuthService
     {
         const response = await fetch(this.TOKEN_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
             body: new URLSearchParams({
                 code: code,
                 client_id: this.CLIENT_ID,
@@ -43,12 +47,14 @@ export abstract class OAuthService
         });
 
         if (!response.ok)
-            throw new Error(`Failed to exchange authorization code for tokens: ${await response.text()}`);
+            throw new Error(`Failed to exchange authorization code for tokens (${ response.status }): ${await response.text()}`);
 
         const tokenData = await response.json();
 
-        if (tokenData.scope != this.SCOPE)
+        if (this.SCOPE_CHECK && tokenData.scope != this.SCOPE)
             throw new Error(`Invalid scope: ${tokenData.scope}`);
+
+        console.log(tokenData);
 
         await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
 

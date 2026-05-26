@@ -1,4 +1,4 @@
-import { ProviderKey } from "../tenants/identity/model";
+import type { ProviderKey } from "../tenants/identity/model";
 
 
 export const identityProviders: Record<ProviderKey, { name: string; description: string }> = {
