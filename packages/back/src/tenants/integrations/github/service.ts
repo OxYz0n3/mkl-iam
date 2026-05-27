@@ -1,5 +1,3 @@
-import { redis } from "bun";
-
 import { TenantIntegrationService } from "../service";
 
 
