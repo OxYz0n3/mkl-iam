@@ -21,7 +21,7 @@ export abstract class GoogleService extends OAuthService
 
     static async validateAccount(accessToken: string): Promise<boolean>
     {
-        const response = await fetch('https://admin.googleapis.com/admin/directory/v1/customers/my_customer', {
+        const response = await fetch('https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer&maxResults=1', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${ accessToken }`,
