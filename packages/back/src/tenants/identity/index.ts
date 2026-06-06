@@ -42,18 +42,22 @@ export const identityCallbacks = new Elysia({ prefix: "/identity", tags: [ "Iden
 
         const { access_token, refresh_token } = await providersServiceMap[provider].getTokensFromAuthorizationCode(tenantId, code);
 
-        await IdentityService.createTenantIdP({
-            provider,
-            encryptedRefreshToken: refresh_token,  // TODO: Encrypt this token before storing
-            tenantId: tenantId,
-        });
-
         const url = new URL(process.env.FRONTEND_URL!);
 
         if (redirectTo)
             url.pathname = redirectTo;
 
-        // const users = await providersServiceMap[provider].getUsers(tenantId, access_token);
+        if (!await providersServiceMap[provider].validateAccount(access_token)) {
+            url.searchParams.set('error', 'not_workspace');
+
+            return (redirect(url.toString()));
+        }
+
+        await IdentityService.createTenantIdP({
+            provider,
+            encryptedRefreshToken: refresh_token,  // TODO: Encrypt this token before storing
+            tenantId: tenantId,
+        });
 
         return (redirect(url.toString()));
     }, {

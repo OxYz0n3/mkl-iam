@@ -1,4 +1,5 @@
 import { OAuthService } from "../../utils/oauth_service";
+import { BadRequestError } from "../../utils/error";
 import { AddUser } from "../users/model";
 import { ProviderKey } from "./model";
 
@@ -18,6 +19,18 @@ export abstract class GoogleService extends OAuthService
     protected static SCOPE = 'https://www.googleapis.com/auth/admin.directory.user';
     protected static TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
+    static async validateAccount(accessToken: string): Promise<boolean>
+    {
+        const response = await fetch('https://admin.googleapis.com/admin/directory/v1/customers/my_customer', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${ accessToken }`,
+            }
+        });
+
+        return (response.ok);
+    }
+
     static async getUsers(tenantId: string, accessToken: string): Promise<AddUser[]>
     {
         const response = await fetch('https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer', {
@@ -26,6 +39,9 @@ export abstract class GoogleService extends OAuthService
                 'Authorization': `Bearer ${ accessToken }`,
             }
         });
+
+        if (response.status === 400)
+            throw new BadRequestError("The connected Google account is not a Google Workspace account. Please reconnect using a Workspace admin account.");
 
         if (!response.ok)
             throw new Error(`Failed to fetch users from Google: ${ await response.text() }`);

@@ -54,8 +54,6 @@ export abstract class OAuthService
         if (this.SCOPE_CHECK && tokenData.scope != this.SCOPE)
             throw new Error(`Invalid scope: ${tokenData.scope}`);
 
-        console.log(tokenData);
-
         await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
 
         return (tokenData);
@@ -121,6 +119,11 @@ export abstract class OAuthService
     static async getUsers(tenantId: string, accessToken: string): Promise<AddUser[]>
     {
         return ([]);
+    }
+
+    static async validateAccount(accessToken: string): Promise<boolean>
+    {
+        return (true);
     }
 
     static async createUser(tenantId: string, newUser: AddUser): Promise<AddUser>

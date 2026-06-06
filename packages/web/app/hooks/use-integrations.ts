@@ -1,3 +1,4 @@
+import useSWRMutation from 'swr/mutation';
 import { app } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import useSWR from "swr";
@@ -14,4 +15,18 @@ export function useIntegrations(tenantId: string)
 
         return (data);
     }, { fallbackData: { addedIntegrations: [], availableIntegrations: {} } }));
+}
+
+export function useDeleteIntegration(tenantId: string)
+{
+    return (useSWRMutation([ '/api/integrations', tenantId ], async ([_, tenantId], { arg }: { arg: string }) => {
+        const { data, error } = await app.tenants({ tenantId }).integrations[arg].delete(undefined, {
+            headers: { Authorization: `Bearer ${ getToken() }` },
+        });
+
+        if (error)
+            throw new Error(error.value.message);
+
+        return (data);
+    }));
 }

@@ -127,6 +127,9 @@ export class TenantUserService {
             return (addedUsers);
 
         } catch (error) {
+            if (error instanceof BadRequestError)
+                throw error;
+
             console.error(error);
 
             throw new HTTPError("Failed to sync users");

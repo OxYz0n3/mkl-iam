@@ -1,16 +1,19 @@
 import { Badge, CheckCircle2, Plug } from "lucide-react";
 import { useOutletContext } from "react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import { ManageIntegration } from "@/components/dialogs/manage-integration";
 
 import { useIntegrations } from "@/hooks/use-integrations";
 
 import { getToken } from "@/lib/auth";
 import { app } from "@/lib/api";
 
+import type { Integration } from "@mkl-iam/back/src/tenants/integrations/model";
 import type { MainContext } from "./main";
 
 import { m } from "@/paraglide/messages";
@@ -22,7 +25,19 @@ export default function Integrations()
 
   const { data: { addedIntegrations, availableIntegrations }, isLoading } = useIntegrations(tenant.id);
 
+  const [ manageOpen, setManageOpen ] = useState(false);
+  const [ managedIntegration, setManagedIntegration ] = useState<Integration | null>(null);
+
   const isAppConnected = (appId: string) => !!addedIntegrations.find(integration => integration.app === appId);
+
+  const handleManage = (appId: string) => {
+    const integration = addedIntegrations.find(i => i.app === appId);
+    if (integration) {
+      setManagedIntegration(integration);
+      setManageOpen(true);
+    }
+  };
+
   const handleConnectIntegration = async (appId: 'gitlab-cloud' | 'github') => {
     const currentPath = window.location.pathname;
 
@@ -86,10 +101,10 @@ export default function Integrations()
                   <div className="mt-6 pt-4 border-t border-border/50">
                     {isAppConnected(appId) ? (
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full"
-                          // onClick={() => handleManage(app.id)}
+                          onClick={() => handleManage(appId)}
                         >
                           { m.manage_integration() }
                         </Button>
@@ -111,6 +126,14 @@ export default function Integrations()
           </div>
         </CardContent>
       </Card>
+      { managedIntegration && (
+        <ManageIntegration
+          tenantId={ tenant.id }
+          integration={ managedIntegration }
+          appInfo={ availableIntegrations[managedIntegration.app] }
+          openState={[ manageOpen, setManageOpen ]}
+        />
+      ) }
     </div>
   );
 }

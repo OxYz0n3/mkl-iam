@@ -1,11 +1,11 @@
-import { useOutletContext } from "react-router";
+import { useOutletContext, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { Settings } from "lucide-react";
 import validator from "validator";
 import { toast } from "sonner";
 
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ManageIdp } from "@/components/dialogs/manage-idp";
 import DeleteTenant from "@/components/dialogs/delete-tenant";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useDeleteIdentity, useIdentity, useIdentityProviders } from "@/hooks/use-identity";
+import { useIdentity, useIdentityProviders } from "@/hooks/use-identity";
 import type { MainContext } from "./main";
 import { getToken } from "@/lib/auth";
 import { app } from "@/lib/api";
@@ -25,10 +25,11 @@ export default function SettingsPage() {
   const { tenant } = useOutletContext<MainContext>();
   const [ tenantName, setTenantName ] = useState("");
   const [ tenantDomain, setTenantDomain ] = useState("");
+  const [ manageIdpOpen, setManageIdpOpen ] = useState(false);
+  const [ searchParams, setSearchParams ] = useSearchParams();
 
   const { data: tenantIdP, isLoading: isTenantIdPLoading } = useIdentity(tenant.id);
   const { data: identityProviders } = useIdentityProviders(tenant.id);
-  const { trigger: deleteIdentity } = useDeleteIdentity(tenant.id);
 
   const hasNameChanged = tenantName.trim() !== tenant.name && tenantName.trim().length > 0;
   const hasDomainChanged = tenantDomain.trim() !== tenant.domain && tenantDomain.trim().length > 0;
@@ -38,6 +39,13 @@ export default function SettingsPage() {
     setTenantName(tenant.name);
     setTenantDomain(tenant.domain);
   }, [ tenant ]);
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'not_workspace') {
+      toast.error(m.idp_error_not_workspace(), { id: 'idp_error_not_workspace' });
+      setSearchParams({}, { replace: true });
+    }
+  }, [ searchParams ]);
 
   const handleConnectIdp = async (provider: keyof typeof identityProviders) => {
     const currentPath = window.location.pathname;
@@ -120,33 +128,9 @@ export default function SettingsPage() {
                     </p>
                     <Separator className="my-4" />
                     { tenantIdP?.provider === providerId ? (
-                      <Dialog>
-                        <DialogTrigger render={
-                          <Button variant="outline" className="w-full">
-                            { m.manage_object({ object: identityProviders[providerId].name })}
-                          </Button>
-                        }>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-xl">
-                          <DialogHeader>
-                            <DialogTitle>{ m.manage_connection({ object: identityProviders[providerId].name }) }</DialogTitle>
-                          </DialogHeader>
-                          <DialogFooter className="sm:flex-wrap">
-                            <DialogClose render={
-                              <Button variant="outline">
-                                { m.close() }
-                              </Button>
-                            }>
-                            </DialogClose>
-                            <Button onClick={() => handleConnectIdp(providerId) } className="w-full sm:w-auto">
-                              { m.reconnect_object({ object: identityProviders[providerId].name }) }
-                            </Button>
-                            <Button variant="destructive" onClick={() => deleteIdentity() } className="w-full whitespace-normal text-center leading-tight sm:w-auto">
-                              { m.delete_connection({ object: identityProviders[providerId].name }) }
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                      <Button variant="outline" className="w-full" onClick={() => setManageIdpOpen(true)}>
+                        { m.manage_object({ object: identityProviders[providerId].name })}
+                      </Button>
                     ) : (
                       <Button disabled={ !!tenantIdP || isTenantIdPLoading } className="w-full" onClick={() => handleConnectIdp(providerId) }>
                         { m.connect_object({ object: identityProviders[providerId].name }) }
@@ -166,6 +150,15 @@ export default function SettingsPage() {
           </Button>
         </CardFooter>
       </Card>
+      { tenantIdP && (
+        <ManageIdp
+          tenantId={ tenant.id }
+          identity={ tenantIdP }
+          providerInfo={ identityProviders[tenantIdP.provider] }
+          onReconnect={() => handleConnectIdp(tenantIdP.provider)}
+          openState={[ manageIdpOpen, setManageIdpOpen ]}
+        />
+      ) }
     </div>
   );
 }
