@@ -6,11 +6,13 @@ import { tenants } from './tenants'
 import { auth } from './auth';
 import openapi from './openapi';
 import { identityCallbacks } from './tenants/identity';
+import { integrationCallbacks } from './utils/callbacks';
 
 
 const app = new Elysia()
   .use(cors())
   .use(openapi)
+  .use(integrationCallbacks)
   .use(auth)
   .use(account)
   .use(tenants)
