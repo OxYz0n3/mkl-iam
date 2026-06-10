@@ -1,11 +1,12 @@
-import validator from "validator";
 import { useEffect, useState } from "react";
+import validator from "validator";
 import { toast } from "sonner";
 
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,12 +21,14 @@ import {
 
 import { useAddUser } from "@/hooks/use-users";
 
-import type { TenantUser } from "@mkl-iam/back/src/tenants/users/model";
-import type { Tenant } from "@mkl-iam/back/src/tenants/model";
+import type { TenantUser } from "@mkl-iam/back/src/modules/tenants/users/model";
+import type { Role } from "@mkl-iam/back/src/modules/tenants/roles/model";
+import type { Tenant } from "@mkl-iam/back/src/modules/tenants/model";
+
 import { m } from "@/paraglide/messages";
 
 
-export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?: TenantUser; openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>] })
+export function UpsertUser({ tenant, user, roles, openState }: { tenant: Tenant; user?: TenantUser; roles: Role[]; openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>] })
 {
   const { trigger: addUser, isMutating: isAddingUser } = useAddUser(tenant.id);
 
@@ -33,6 +36,7 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
   const [ primaryEmail, setPrimaryEmail ] = useState("");
   const [ firstName, setFirstName ] = useState("");
   const [ lastName, setLastName ] = useState("");
+  const [ roleId, setRoleId ] = useState<string | null>(null);
 
   const [ open, setOpen ] = openState;
 
@@ -41,9 +45,10 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
     setLastName(user?.lastName || "");
     setPrimaryEmail(user?.primaryEmail.replace(`@${tenant.domain}`, "") || "");
     setSecondaryEmail(user?.secondaryEmail || "");
+    setRoleId(user?.roleId ?? null);
   }, [ user ]);
 
-  const isValid = firstName.trim() !== "" && lastName.trim() !== "" && validator.isEmail(`${primaryEmail}@${tenant.domain}`);
+  const isValid = firstName.trim() !== "" && lastName.trim() !== "" && validator.isEmail(`${primaryEmail}@${tenant.domain}`) && roleId !== null;
 
   const handleUserSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,6 +58,7 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
       lastName,
       primaryEmail: `${primaryEmail}@${tenant.domain}`,
       secondaryEmail: (secondaryEmail.trim() !== "" ? secondaryEmail : undefined),
+      roleId: roleId,
     });
 
     toast.success(m.user_add_success());
@@ -114,7 +120,20 @@ export function UpsertUser({ tenant, user, openState }: { tenant: Tenant; user?:
             </Field>
             <Field>
               <Label>{ m.role() }</Label>
-              <Input disabled placeholder={ m.feature_under_development() } />
+              <Select value={ roleId } onValueChange={ setRoleId } items={ roles.map((role) => ({ label: role.name, value: role.id })) } disabled={ roles.length === 0 }>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a role"/>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Roles</SelectLabel>
+                    { roles.map(role => (
+                      <SelectItem value={ role.id } key={ role.id }>{ role.name }</SelectItem>
+                    )) }
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              { roles.length === 0 && <FieldDescription>{ m.role_no_options() }</FieldDescription> }
             </Field>
           </FieldGroup>
           <DialogFooter>

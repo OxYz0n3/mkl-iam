@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 import { useDeleteIntegration } from "@/hooks/use-integrations";
 
-import type { Integration } from "@mkl-iam/back/src/tenants/integrations/model";
+import type { Integration } from "@mkl-iam/back/src/modules/tenants/integrations/model";
 import { m } from "@/paraglide/messages";
 
 

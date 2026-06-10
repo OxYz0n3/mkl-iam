@@ -4,7 +4,7 @@ import useSWR from 'swr';
 import { app } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
-import type { UpsertRole } from '@mkl-iam/back/src/tenants/roles/model';
+import type { UpsertRole } from '@mkl-iam/back/src/modules/tenants/roles/model';
 
 
 export function useRoles(tenantId: string)

@@ -1,8 +1,8 @@
 import type { LucideProps } from "lucide-react";
 import { useNavigate } from "react-router";
 
-import type { Tenant } from "@mkl-iam/back/src/tenants/model";
-import type { User } from "@mkl-iam/back/src/auth/model"
+import type { Tenant } from "@mkl-iam/back/src/modules/tenants/model";
+import type { User } from "@mkl-iam/back/src/modules/auth/model"
 
 import { TenantsSwitcher } from "@/components/tenants-switcher"
 import { NavUser } from "@/components/nav-user"

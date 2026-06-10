@@ -1,6 +1,6 @@
 import { redirect } from "react-router";
 import { app } from "./api";
-import type { User } from "@mkl-iam/back/src/auth/model";
+import type { User } from "@mkl-iam/back/src/modules/auth/model";
 
 
 let accessToken: string | null = null;

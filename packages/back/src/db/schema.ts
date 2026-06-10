@@ -1,8 +1,8 @@
 import { jsonb, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
-import { integrations } from "../utils/integrations";
-import { identityProviders } from "../utils/identity";
+import { integrations } from "../providers/apps/registry";
+import { identityProviders } from "../providers/identity/registry";
 
 
 export const idpEnum = pgEnum('idp_provider', Object.keys(identityProviders) as [ keyof typeof identityProviders ]);
@@ -35,6 +35,16 @@ export const users     = pgTable("users", {
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const roles = pgTable("roles", {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+    unique('role_name_tenant_unique_idx').on(table.tenantId, table.name)
+]);
+
 export const usersToTenants = pgTable('users_to_tenants', {
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
@@ -53,7 +63,7 @@ export const tenantUsers = pgTable("tenant_users", {
     secondaryEmail: varchar('secondary_email', { length: 255 }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
-    role: varchar('role', { length: 100 }),
+    roleId: uuid('role_id').references(() => roles.id, { onDelete: 'set null' }),
 }, (table) => [
     unique().on(table.primaryEmail, table.tenantId)
 ]);
@@ -70,21 +80,11 @@ export const tenantIntegrations = pgTable("tenant_integrations", {
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     app: appEnum('app').notNull(),
-    metadata: jsonb('metadata').default({}),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => [
     unique('tenant_app_unique_idx').on(table.tenantId, table.app)
-]);
-
-export const roles = pgTable("roles", {
-    id: uuid('id').primaryKey().defaultRandom(),
-    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-    name: varchar('name', { length: 100 }).notNull(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
-}, (table) => [
-    unique('role_name_tenant_unique_idx').on(table.tenantId, table.name)
 ]);
 
 export const roleIntegrations = pgTable("role_integrations", {

@@ -22,7 +22,7 @@ import {
 import { localizeHref } from "@/paraglide/runtime"
 import { m } from "@/paraglide/messages"
 
-import type { Tenant } from "@mkl-iam/back/src/tenants/model"
+import type { Tenant } from "@mkl-iam/back/src/modules/tenants/model"
 
 
 export function TenantsSwitcher({

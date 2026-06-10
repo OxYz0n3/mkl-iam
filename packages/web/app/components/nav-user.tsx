@@ -29,7 +29,7 @@ import {
 import { m } from "@/paraglide/messages"
 import { logout } from "@/lib/auth"
 
-import type { User } from "@mkl-iam/back/src/auth/model"
+import type { User } from "@mkl-iam/back/src/modules/auth/model"
 
 
 function UserAvatar({ user }: { user: User })

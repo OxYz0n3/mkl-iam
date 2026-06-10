@@ -1,0 +1,143 @@
+import { redis, randomUUIDv7 } from "bun";
+
+import { IdentityService } from "../modules/tenants/identity/service";
+import { AddUser } from "../modules/tenants/users/model";
+import { NotImplementedError } from "../lib/error";
+import { decryptToken } from "../lib/crypto";
+
+
+export abstract class OAuthService
+{
+    protected static AUTH_URL: string;
+    protected static CLIENT_ID: string;
+    protected static REDIRECT_URI: string;
+    protected static SCOPE: string;
+    protected static TOKEN_URL: string;
+    protected static CLIENT_SECRET: string;
+    protected static SCOPE_CHECK: boolean = true;
+
+    static getAuthUrl(state: string): string
+    {
+        const url = new URL(this.AUTH_URL);
+
+        url.searchParams.set('client_id', this.CLIENT_ID);
+        url.searchParams.set('redirect_uri', this.REDIRECT_URI);
+        url.searchParams.set('response_type', 'code');
+        url.searchParams.set('scope', this.SCOPE);
+        url.searchParams.set('access_type', 'offline');  // Request refresh token
+        url.searchParams.set('prompt', 'consent');  // Force consent to get refresh token
+        url.searchParams.set('state', state);
+
+        return (url.toString());
+    }
+
+    static async getTokensFromAuthorizationCode(tenantId: string, code: string): Promise<{ access_token: string; refresh_token: string; }>
+    {
+        const response = await fetch(this.TOKEN_URL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                code: code,
+                client_id: this.CLIENT_ID,
+                client_secret: this.CLIENT_SECRET,
+                redirect_uri: this.REDIRECT_URI,
+                grant_type: 'authorization_code',
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Failed to exchange authorization code for tokens (${ response.status }): ${await response.text()}`);
+
+        const tokenData = await response.json();
+
+        if (this.SCOPE_CHECK && !this.scopesGranted(tokenData.scope))
+            throw new Error(`Invalid scope: ${tokenData.scope}`);
+
+        await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
+
+        return (tokenData);
+    }
+
+    static async createNonce(): Promise<string>
+    {
+        const nonce = randomUUIDv7();
+
+        await redis.set(`nonce:${ nonce }`, 'valid', 'EX', 10 * 60);  // Store nonce in Redis with 10 minute expiration
+
+        return (nonce);
+    }
+
+    static async verifyNonce(nonce: string): Promise<boolean>
+    {
+        const cachedNonce = await redis.get(`nonce:${nonce}`);
+
+        if (!cachedNonce)
+            return (false);
+
+        await redis.del(`nonce:${nonce}`);
+
+        return (true);
+    }
+
+    static async getAccessToken(tenantId: string): Promise<string>
+    {
+        const cachedToken = await redis.get(`idp_access_token:${ tenantId }`);
+
+        if (cachedToken)
+            return (cachedToken);
+
+        const tenantIdP = await IdentityService.getTenantIdP(tenantId);
+
+        if (!tenantIdP)
+            throw new Error("No identity provider configured for this tenant");
+
+        const response = await fetch(this.TOKEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                client_id: this.CLIENT_ID,
+                client_secret: this.CLIENT_SECRET,
+                refresh_token: decryptToken(tenantIdP.encryptedRefreshToken),
+                grant_type: 'refresh_token',
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Failed to exchange refresh token for access token: ${await response.text()}`);
+
+        const tokenData = await response.json();
+
+        if (this.SCOPE_CHECK && !this.scopesGranted(tokenData.scope))
+            throw new Error(`Invalid scope: ${tokenData.scope}`);
+
+        await redis.set(`idp_access_token:${ tenantId }`, tokenData.access_token, 'EX', tokenData.expires_in - 60);  // Cache access token, set to expire slightly before actual expiration
+
+        return (tokenData.access_token);
+    }
+
+    /** Order-insensitive scope check: every required scope must have been granted. */
+    protected static scopesGranted(grantedScope: string | undefined): boolean
+    {
+        const granted = new Set((grantedScope ?? '').split(/\s+/).filter(Boolean));
+
+        return (this.SCOPE.split(/\s+/).every((scope) => granted.has(scope)));
+    }
+
+    static async getUsers(tenantId: string, accessToken: string): Promise<AddUser[]>
+    {
+        throw new NotImplementedError(`getUsers is not supported by this provider`);
+    }
+
+    static async validateAccount(accessToken: string): Promise<boolean>
+    {
+        return (true);
+    }
+
+    static async createUser(tenantId: string, newUser: AddUser): Promise<AddUser>
+    {
+        throw new NotImplementedError(`createUser is not supported by this provider`);
+    }
+}

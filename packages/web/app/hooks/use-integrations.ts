@@ -19,7 +19,7 @@ export function useIntegrations(tenantId: string)
 
 export function useIntegrationResources(tenantId: string, integrationId: string)
 {
-    return (useSWR(integrationId ? [ '/api/integration-resources', tenantId, integrationId ] : null, async ([_, tenantId, integrationId]) => {
+    return (useSWR([ '/api/integration-resources', tenantId, integrationId ], async ([_, tenantId, integrationId]) => {
         const { data, error } = await app.tenants({ tenantId }).integrations({ integrationId }).resources.get({
             headers: { Authorization: `Bearer ${ getToken() }` },
         });

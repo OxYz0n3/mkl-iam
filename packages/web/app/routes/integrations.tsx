@@ -13,7 +13,7 @@ import { useIntegrations } from "@/hooks/use-integrations";
 import { getToken } from "@/lib/auth";
 import { app } from "@/lib/api";
 
-import type { Integration } from "@mkl-iam/back/src/tenants/integrations/model";
+import type { Integration } from "@mkl-iam/back/src/modules/tenants/integrations/model";
 import type { MainContext } from "./main";
 
 import { m } from "@/paraglide/messages";
@@ -32,22 +32,23 @@ export default function Integrations()
 
   const handleManage = (appId: string) => {
     const integration = addedIntegrations.find(i => i.app === appId);
+
     if (integration) {
       setManagedIntegration(integration);
       setManageOpen(true);
     }
   };
 
-  const handleConnectIntegration = async (appId: 'gitlab-cloud' | 'github') => {
+  const handleConnectIntegration = async (appId: 'gitlab-cloud' | 'github', appType: 'oauth' | 'accessToken' | 'custom') =>
+  {
     const currentPath = window.location.pathname;
 
-    const { data, error } = await app.tenants({ tenantId: tenant.id }).integrations[appId]['login-url'].get({
+    const { data, error } = await app.tenants({ tenantId: tenant.id }).integrations['login-url']({ integrationKey: appId }).get({
       headers: {
         Authorization: `Bearer ${ getToken() }`,
       },
       query: {
         redirectTo: currentPath,
-        tenantId: tenant.id,
       }
     });
 
@@ -112,7 +113,7 @@ export default function Integrations()
                     ) : (
                       <Button 
                         className="w-full"
-                        onClick={() => handleConnectIntegration(appId) }
+                        onClick={() => handleConnectIntegration(appId, app.type) }
                       >
                         { m.connect_object({ object: app.name }) }
                       </Button>

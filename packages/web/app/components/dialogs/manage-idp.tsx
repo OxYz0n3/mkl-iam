@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 
 import { useDeleteIdentity } from "@/hooks/use-identity";
 
-import type { TenantIdP } from "@mkl-iam/back/src/tenants/identity/model";
+import type { TenantIdP } from "@mkl-iam/back/src/modules/tenants/identity/model";
 import { m } from "@/paraglide/messages";
 
 

@@ -9,7 +9,7 @@ import { Input } from "../ui/input";
 
 import { useDeleteTenant } from "@/hooks/use-tenants";
 
-import type { Tenant } from "@mkl-iam/back/src/tenants/model";
+import type { Tenant } from "@mkl-iam/back/src/modules/tenants/model";
 
 import { m } from '@/paraglide/messages.js'
 

@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/table";
 
 import { useUsers, useSyncUsers } from "@/hooks/use-users";
+import { useRoles } from "@/hooks/use-roles";
 
-import type { TenantUser } from "@mkl-iam/back/src/tenants/users/model";
+import type { TenantUser } from "@mkl-iam/back/src/modules/tenants/users/model";
 import type { MainContext } from "./main";
 
 import { m } from "@/paraglide/messages";
@@ -28,13 +29,14 @@ import { m } from "@/paraglide/messages";
 
 export default function Users() {
   const { tenant } = useOutletContext<MainContext>();
-
+  
   const { trigger: syncUsers, isMutating: isSyncingUsers } = useSyncUsers(tenant.id);
   const [ updateUser, setUpdateUser ] = useState<TenantUser | undefined>(undefined);
   const [ deleteUserId, setDeleteUserId ] = useState<string>("");
   const { data: users, isLoading } = useUsers(tenant.id);
   const [ deleteOpen, setDeleteOpen ] = useState(false);
   const [ upsertOpen, setUpsertOpen ] = useState(false);
+  const { data: roles } = useRoles(tenant.id);
 
   useEffect(() => {
     if (!upsertOpen) setUpdateUser(undefined);
@@ -112,7 +114,7 @@ export default function Users() {
                     <TableRow key={user.id}>
                       <TableCell className="px-3 py-2">{`${user.firstName} ${user.lastName}`}</TableCell>
                       <TableCell className="px-3 py-2">{user.primaryEmail}</TableCell>
-                      <TableCell className="px-3 py-2">{user.role}</TableCell>
+                      <TableCell className="px-3 py-2">{ roles.find((role) => role.id === user.roleId)?.name || '-' }</TableCell>
                       <TableCell className="px-3 py-2 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger render={
@@ -146,7 +148,7 @@ export default function Users() {
               </TableBody>
             </Table>
           </div>
-          <UpsertUser tenant={ tenant } user={ updateUser } openState={[upsertOpen, setUpsertOpen]} />
+          <UpsertUser tenant={ tenant } user={ updateUser } roles={ roles } openState={[upsertOpen, setUpsertOpen]} />
           <DeleteUser
             tenantId={tenant.id}
             userId={deleteUserId}

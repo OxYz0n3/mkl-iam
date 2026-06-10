@@ -13,8 +13,8 @@ import { m } from "@/paraglide/messages";
 
 import { useTenants } from "@/hooks/use-tenants";
 
-import type { Tenant } from "@mkl-iam/back/src/tenants/model";
-import type { User } from "@mkl-iam/back/src/auth/model";
+import type { Tenant } from "@mkl-iam/back/src/modules/tenants/model";
+import type { User } from "@mkl-iam/back/src/modules/auth/model";
 
 
 export type MainContext = {
@@ -61,12 +61,14 @@ export default function Main()
       navigate(localizeHref("/add-tenant"));
   }, [ tenants ]);
 
+  console.log(location);
+
   return (
     <SidebarProvider>
       <TooltipProvider>
         <AppSidebar user={user} tenants={tenants} menuItems={menuItems} activeTenant={activeTenant} setActiveTenant={setActiveTenant} />
         <SidebarInset className="md:peer-data-[variant=inset]:m-3 md:peer-data-[variant=inset]:ml-0">
-          <SiteHeader itemName={ menuItems.find(item => item.href === location.pathname)?.name || m.dashboard() } />
+          <SiteHeader itemName={ menuItems.find(item => location.pathname.endsWith(item.href))?.name || m.dashboard() } />
           <div className="flex-1 p-6">
             { activeTenant &&
               <Outlet context={{ user, tenant: activeTenant }}/>

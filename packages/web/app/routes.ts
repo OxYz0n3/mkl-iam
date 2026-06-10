@@ -8,6 +8,7 @@ export default [
             layout("routes/main.tsx", [
                 index("routes/dashboard.tsx"),
                 route("users", "routes/users.tsx"),
+                route("roles", "routes/roles.tsx"),
                 route("integrations", "routes/integrations.tsx"),
                 route("settings", "routes/settings.tsx"),
             ])

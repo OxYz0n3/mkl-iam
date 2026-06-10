@@ -1,7 +1,7 @@
 import { Elysia, } from "elysia";
 import jwt from "@elysiajs/jwt";
 
-import { UnauthorizedError } from "./utils/error";
+import { UnauthorizedError } from "./lib/error";
 
 
 if (!process.env['ACCESS_JWT_SECRET'])
