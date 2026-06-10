@@ -70,12 +70,31 @@ export const tenantIntegrations = pgTable("tenant_integrations", {
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     app: appEnum('app').notNull(),
-    encryptedRefreshToken: text('encrypted_refresh_token').notNull(),
-    metadata: jsonb('metadata').default({}), 
+    metadata: jsonb('metadata').default({}),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => [
     unique('tenant_app_unique_idx').on(table.tenantId, table.app)
+]);
+
+export const roles = pgTable("roles", {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+    unique('role_name_tenant_unique_idx').on(table.tenantId, table.name)
+]);
+
+export const roleIntegrations = pgTable("role_integrations", {
+    id: uuid('id').primaryKey().defaultRandom(),
+    roleId: uuid('role_id').notNull().references(() => roles.id, { onDelete: 'cascade' }),
+    integrationId: uuid('integration_id').notNull().references(() => tenantIntegrations.id, { onDelete: 'cascade' }),
+    config: jsonb('config').default({}),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => [
+    unique('role_integration_unique_idx').on(table.roleId, table.integrationId)
 ]);
 
 
@@ -87,4 +106,6 @@ export const table = {
     usersToTenants,
     tenantIdP,
     tenantIntegrations,
+    roles,
+    roleIntegrations,
 };

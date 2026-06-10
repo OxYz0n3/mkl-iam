@@ -5,6 +5,7 @@ import { tCreateTenant, tTenant } from "./model";
 import { integrations } from "./integrations";
 import { TenantService } from "./service";
 import { identity } from "./identity";
+import { roles } from "./roles";
 import { users } from "./users";
 
 
@@ -41,4 +42,5 @@ export const tenants = new Elysia({ prefix: "/tenants", tags: [ "Tenants" ] })
         .use(users)
         .use(integrations)
         .use(identity)
+        .use(roles)
     );

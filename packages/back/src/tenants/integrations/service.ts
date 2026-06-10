@@ -1,8 +1,11 @@
 import { and, eq } from "drizzle-orm";
 
-import { AvailableIntegrations, Integration, AddIntegration } from "./model";
-import { integrations } from "../../utils/integrations";
+import type { AvailableIntegrations, Integration, AddIntegration } from "./model";
+import type { TenantUser } from "../users/model";
+
+import { NotFoundError, NotImplementedError } from "../../utils/error";
 import { OAuthService } from "../../utils/oauth_service";
+import { integrations } from "../../utils/integrations";
 import { table } from "../../db/schema";
 import { db } from "../../db/db";
 
@@ -17,6 +20,16 @@ export abstract class IntegrationService
             addedIntegrations,
             availableIntegrations: integrations
         });
+    }
+
+    static async getIntegrationById(tenantId: string, integrationId: string)
+    {
+        const [ integration ] = await db.select().from(table.tenantIntegrations).where(and(eq(table.tenantIntegrations.id, integrationId), eq(table.tenantIntegrations.tenantId, tenantId)));
+
+        if (!integration)
+            throw new NotFoundError("Integration not found");
+
+        return (integration);
     }
 
     static async deleteIntegration(tenantId: string, integrationId: string): Promise<void>
@@ -36,7 +49,8 @@ export class TenantIntegrationService extends OAuthService
             const [ tenantIntegration ] = await db.insert(table.tenantIntegrations).values(integrationData).onConflictDoUpdate({
                 target: [ table.tenantIntegrations.tenantId, table.tenantIntegrations.app ],
                 set: {
-                    encryptedRefreshToken: integrationData.encryptedRefreshToken,
+                    metadata: integrationData.metadata ?? {},
+                    updatedAt: new Date(),
                 }
             }).returning();
 
@@ -47,5 +61,14 @@ export class TenantIntegrationService extends OAuthService
             throw new Error("Failed to create integration");
         }
     }
-}
 
+    static async createAccount(user: TenantUser): Promise<void>
+    {
+        throw new NotImplementedError();
+    }
+
+    static async getResources(metadata: any): Promise<any>
+    {
+        throw new NotImplementedError();
+    }
+}

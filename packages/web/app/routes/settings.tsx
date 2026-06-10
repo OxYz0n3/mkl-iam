@@ -150,7 +150,7 @@ export default function SettingsPage() {
           </Button>
         </CardFooter>
       </Card>
-      { tenantIdP && (
+      { tenantIdP && identityProviders[tenantIdP.provider] && (
         <ManageIdp
           tenantId={ tenant.id }
           identity={ tenantIdP }
